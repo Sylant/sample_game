@@ -29,7 +29,7 @@ namespace game
 	//0.3fレベル　 プレイヤー、ボス
 	//0.35fレベル　ミニエネミー、道具
 	//0.4fレベル 　雷、道具ゲットアニメ、プレイヤーの影
-	//0.45fレベル  BGMアイコン
+	//0.45fレベル  BGMアイコン、HP描字
 	//0.5fレベル　 ステージ背景描画、地面描画、撃殺数描画
 	//0.6fレベル   LOGO、選択し
 	//0.7fレベル   タイトル背景
@@ -44,7 +44,7 @@ namespace game
 	//KEY_MOUSE_RBTN  -> 右クリック
 	//////////////////////////////////////////////////////////////////////////
 
-	Stage::Stage(const std::string& objectName, int tips)
+	Stage::Stage(const std::string& objectName,const int& tips)
 		:
 		Object(objectName)
 	{
@@ -59,6 +59,27 @@ namespace game
 		graph::Draw_LoadObject("message", "res/gra/Stage/message.png", 0x00000000);
 		graph::Draw_LoadObject("count", "res/gra/Stage/count.png", 0xFFFFFFFF);
 		graph::Draw_LoadObject("kill", "res/gra/Stage/kill.png", 0xFFFFFFFF);
+		graph::Draw_LoadObject("player", "res/gra/Player/player.png");
+		graph::Draw_LoadObject("all_explosion", "res/gra/Player/all_explosion.png", 0x00000000);
+		graph::Draw_LoadObject("get_tool", "res/gra/Player/esc.png", 0x00000000);
+		graph::Draw_LoadObject("ammo", "res/gra/Player/ammo.png", 0x00000000);
+		graph::Draw_LoadObject("boss", "res/gra/Enemy/boss.png");
+		graph::Draw_LoadObject("bullet_explosion", "res/gra/Enemy/bullet_explosion.png", 0xFFFFFFFF);
+		graph::Draw_LoadObject("e_explosion", "res/gra/Enemy/explosion.png", 0x00000000);
+		graph::Draw_LoadObject("bomb2", "res/gra/Enemy/mini_explosion.png", 0x00000000);
+		graph::Draw_LoadObject("ld_explosion", "res/gra/Enemy/ld_explosion.png", 0xFFFFFFFF);
+		graph::Draw_LoadObject("ufo_explosion", "res/gra/Enemy/ufo_explosion.png");
+		graph::Draw_LoadObject("p_bullet", "res/gra/Player/bullet.png");
+		graph::Draw_LoadObject("e_missiles", "res/gra/Enemy/e_missile.png");
+		graph::Draw_LoadObject("mini", "res/gra/Enemy/miniboss.png", 0x00000000);
+		graph::Draw_LoadObject("lightning", "res/gra/Enemy/lightning.png");
+		graph::Draw_LoadObject("landmine", "res/gra/Enemy/landmine.png");
+		graph::Draw_LoadObject("ufo_atk", "res/gra/Enemy/miniufo_attack.png");
+		graph::Draw_LoadObject("ufo", "res/gra/Enemy/miniufo.png");
+		graph::Draw_LoadObject("heli", "res/gra/Enemy/helicopter.png");
+		graph::Draw_LoadObject("e_bullet", "res/gra/Enemy/bullet.png");
+		graph::Draw_LoadObject("track", "res/gra/Enemy/track.png");
+		graph::Draw_LoadObject("tk_explosion", "res/gra/Enemy/tk_explosion.png");
 		//BGM、SE
 		DShow_LoadFile("stage_bgm", "res/bgm/bgm_02.wav");
 		DSound_LoadFile("tool_get", "res/se/se_03.wav");
@@ -70,10 +91,10 @@ namespace game
 		DSound_LoadFile("light", "res/se/se_08.wav");
 		DSound_LoadFile("e_bullet", "res/se/se_09.wav");
 		DSound_LoadFile("beam", "res/se/se_10.wav");
-		DSound_LoadFile("e_explode", "res/se/se_11.wav");
+		DSound_LoadFile("e_explosion", "res/se/se_11.wav");
 		DSound_LoadFile("kill", "res/se/se_12.wav");
 		DSound_LoadFile("landmine", "res/se/se_13.wav");
-		DSound_LoadFile("all_explode", "res/se/se_14.wav");
+		DSound_LoadFile("all_explosion", "res/se/se_14.wav");
 		DSound_LoadFile("boss_atk", "res/se/se_15.wav");
 		DSound_LoadFile("boss_atk2", "res/se/se_16.wav");
 		DSound_LoadFile("win", "res/se/se_17.wav");
@@ -88,7 +109,11 @@ namespace game
 		//プレイヤーの値を返し
 		return player;
 	}
+	//デストラクタ
+	Stage::~Stage()
+	{
 
+	}
 	//初期化
 	void Stage::init()
 	{
@@ -138,7 +163,7 @@ namespace game
 	}
 
 	//状態により表示するmessageを変化
-	void Stage::result(int result)
+	void Stage::result(const int& result)
 	{
 		result_ = result;
 
@@ -270,7 +295,7 @@ namespace game
 		}
 	}
 	//intで敵を倒し時の戻り値を返す
-	int Stage::e_kill(int count)
+	int Stage::e_kill(const int& count)
 	{
 		kill_count = count;
 		return kill_count;
@@ -292,7 +317,6 @@ namespace game
 			{
 				num_1 = 0;
 				num_2 += count_w;
-				num_3 = 0;
 			}
 			else if (num_2 > count_w * 9)
 			{

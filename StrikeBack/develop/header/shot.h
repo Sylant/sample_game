@@ -20,6 +20,7 @@ namespace game
 		int animMax_;
 	public:
 		shot(const std::string& objectName);
+		~shot();
 
 		void render() override;
 		void update() override;
@@ -36,7 +37,9 @@ namespace game
 		int p_bullet_w;
 		int p_bullet_h;
 	public:
-		p_shot1(const std::string& objectName, float posX, float posY, float targetX, float targetY, float cnt , float angle);
+		p_shot1(const std::string& objectName, const float& posX, const float& posY,
+			const float& targetX, const float& targetY, const float& cnt, const float& angle);
+		~p_shot1();
 
 		void ps_out();
 		void ps_setoffense();
@@ -55,7 +58,8 @@ namespace game
 		bool s1_show;
 		float s1_speed;
 	public:
-		e_shot1(const std::string& objectName, float posX, float posY , float speed);
+		e_shot1(const std::string& objectName,const float& posX,const float& posY ,const float& speed);
+		~e_shot1();
 
 		void s1_out();
 		void s1_anim();
@@ -86,7 +90,8 @@ namespace game
 		bool bomb2_show;
 		enum s2_mode { NORMAL, MOVE, ATTACK, SUICIDE, DIED };
 	public:
-		e_shot2(const std::string& obejctName, float posX, float posY, int num);
+		e_shot2(const std::string& obejctName, const float& posX, const float& posY, const int& num);
+		~e_shot2();
 
 		void s1_move();
 		void s1_anim();
@@ -107,7 +112,8 @@ namespace game
 		float atk_times;
 		bool s2_atk_show;
 	public:
-		e_shot2_atk(const std::string& objectName , float posX);
+		e_shot2_atk(const std::string& objectName ,const float& posX);
+		~e_shot2_atk();
 
 		void s2a_anim();
 		void s2a_setoffense();
@@ -130,6 +136,7 @@ namespace game
 		
 	public:
 		e_shot3(const std::string& obejctName);
+		~e_shot3();
 
 		void s3_anim();
 		void s3_setoffense();
@@ -158,6 +165,7 @@ namespace game
 
 	public:
 		e_shot4(const std::string& obejctName);
+		~e_shot4();
 
 		void s4_move();
 		void s4_anim();
@@ -174,7 +182,8 @@ namespace game
 		int s4_atk_w;
 		int s4_atk_h;
 	public:
-		e_shot4_atk(const std::string& objectName, float posX, float posY);
+		e_shot4_atk(const std::string& objectName, const float& posX, const float& posY);
+		~e_shot4_atk();
 
 		void s4a_anim();
 		void render() override;
@@ -195,6 +204,7 @@ namespace game
 		enum s5_mode { NORMAL, ATTACK };
 	public:
 		e_shot5(const std::string& obejctName);
+		~e_shot5();
 
 		void s5_move();
 		void s5_anim();
@@ -217,10 +227,80 @@ namespace game
 		float atk_speed;
 		bool atk_show;
 	public:
-		e_shot5_atk(const std::string& objectName, float posX, float posY, float angle);
+		e_shot5_atk(const std::string& objectName, const float& posX, const float& posY, const float& angle);
+		~e_shot5_atk();
 
 		void s5a_out();
 		void s5a_setoffense();
+		void render() override;
+		void update() override;
+		//çUåÇîªíËÇ…ÇÊÇËçUåÇÇó^Ç¶ÇΩ
+		void offenseHit(std::weak_ptr<ci_ext::Object>&) override;
+	};
+
+	class e_shot6 : public shot
+	{
+	private:
+		int hp_;
+		int frame_;
+		int state_;
+		int shot6_w;
+		int shot6_h;
+		float posX_;
+		float moving_speed;
+		bool atk_show;
+		enum s6_mode { NORMAL, ATTACK };
+	public:
+		e_shot6(const std::string& obejctName);
+		~e_shot6();
+
+		void s6_move();
+		void s6_anim();
+		void s6_setdefense();
+		void render() override;
+		void update() override;
+		//Ç‚ÇÁÇÍîªíËÇ…çUåÇÇêHÇÁÇ¡ÇΩ
+		void defenseHit(std::weak_ptr<ci_ext::Object>&) override;
+	};
+
+	class e_shot6_thorw : public shot
+	{
+	private:
+		int hp_;
+		int s6_thorw_w;
+		int s6_thorw_h;
+	public:
+		e_shot6_thorw(const std::string& obejctName, const float& posX, const float& posY);
+		~e_shot6_thorw();
+
+		void s6t_move();
+		void s6t_setdefense();
+		void render() override;
+		void update() override;
+		//Ç‚ÇÁÇÍîªíËÇ…çUåÇÇêHÇÁÇ¡ÇΩ
+		void defenseHit(std::weak_ptr<ci_ext::Object>&) override;
+	};
+
+	class e_shot6_atk : public shot
+	{
+	private:
+		int s6_atk_w;
+		int s6_atk_h;
+		float atk_;
+		float atk_times;
+		float targetX_;
+		float targetY_;
+		float player_posX;
+		float player_posY;
+		float atk_speed;
+		bool atk_show;
+	public:
+		e_shot6_atk(const std::string& objectName, const float& p_posX, const float& p_posY, const float& angle);
+		~e_shot6_atk();
+
+		void s6a_move();
+		void s6a_out();
+		void s6a_setoffense();
 		void render() override;
 		void update() override;
 		//çUåÇîªíËÇ…ÇÊÇËçUåÇÇó^Ç¶ÇΩ

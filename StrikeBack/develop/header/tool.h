@@ -16,6 +16,7 @@ namespace game
 		int animMax_;
 	public:
 		Tool(const std::string& objectName);
+		~Tool();
 
 		std::shared_ptr<Player> getPlayerPrt();
 
@@ -35,6 +36,7 @@ namespace game
 		int p_hp;
 	public:
 		Tool1(const std::string& objectName);
+		~Tool1();
 
 		void t1_setoffense();
 		void render() override;

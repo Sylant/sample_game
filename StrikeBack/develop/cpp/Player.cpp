@@ -6,6 +6,7 @@
 #include "tool.h"
 #include "stage.h"
 #include "Enemy.h"
+#include <sstream>
 
 namespace game
 {
@@ -34,12 +35,10 @@ namespace game
 		return boss;
 	}
 
-	Player::Player(const string& objectName, int tips) :
+	Player::Player(const string& objectName,const int& tips) :
 		MovableObject(
 			DrawObjf(objectName, Vec3f::one(), Vec3f::one(), "player", Vec3f::zero(), Vec3f(85.f, 63.f, 0.f), Color(0xFFFFFFFF), 0))
 	{
-		//画像読み込み
-		graph::Draw_LoadObject("player", "res/gra/Player/player.png");
 		//画像のサイズを取得
 		player_w = graph::Draw_GetImageWidth("player") / 6;
 		player_h = graph::Draw_GetImageHeight("player");
@@ -51,33 +50,37 @@ namespace game
 		SetRect(&defenseRect, 0, 0, player_w, player_h);                                                  //受け判定範囲
 		OffsetRect(&defenseRect, ix() - halfsize<int>().x(), iy() - halfsize<int>().y());     //受け判定初期化
 		
-		bullet_ = 2;             //左攻撃の発射弾数
-		init_moving_speed = 3.f; //移動速度初期値
-		moving_speed = 3.f;      //移動速度
-		Max_hp = 400.f;          //初期ｈｐ
-		Max_mp = 400.f;          //初期ｍｐ
-		hp_ = 0.f;               //損したｈｐ
-		mp_ = 0.f;               //損したｍｐ
-		mp_count = 0;            //加速度を制御するためのカウント数
-		hp_times = 0.008f;       //最大ｈｐによりｈｐ消耗倍数
-		mp_times = 0.02f;        //最大ｍｐによりｍｐ消耗倍数
-		mp_healing = 0.006f;     //最大ｍｐによりｍｐ自動回復倍数
-		shadow_count = 0;        //影のカウント数
-		result_ = true;          //ゲームオーバーする時に制御
-		def_show = false;        //やられたら、画面変化の判定
-		hp_draw_top = 630;       //ｈｐ描画の上、下、左、右の値を設定
-		hp_draw_bottom = 615;
+		bullet_ = 2;                 //左攻撃の発射弾数
+		init_moving_speed = 3.f;     //移動速度初期値
+		moving_speed = 3.f;          //移動速度
+		Max_hp = 400.f;              //初期ｈｐ
+		Max_mp = 400.f;              //初期ｍｐ
+		hp_ = 0.f;                   //損したｈｐ
+		mp_ = 0.f;                   //損したｍｐ
+		mp_count = 0;                //加速度を制御するためのカウント数
+		hp_times = 0.008f;           //最大ｈｐによりｈｐ消耗倍数
+		mp_times = 0.01f;            //最大ｍｐによりｍｐ消耗倍数
+		mp_healing = 0.006f;         //最大ｍｐによりｍｐ自動回復倍数
+		shadow_count = 0;            //影のカウント数
+		result_ = true;              //ゲームオーバーする時に制御
+		def_show = false;            //やられたら、画面変化の判定
+		hp_draw_top = 615;           //ｈｐ描画の上、下、左、右の値を設定
+		hp_draw_bottom = 635;
 		hp_draw_left = 440;
 		hp_draw_right = 840;
-		mp_draw_top = 630;       //ｍｐ描画の上、下、左、右の値を設定
-		mp_draw_bottom = 615;
+		mp_draw_top = 615;           //ｍｐ描画の上、下、左、右の値を設定
+		mp_draw_bottom = 635;
 		mp_draw_left = 20;
 		mp_draw_right = 420;
-		tips_ = tips;            //隠し技コマンド　値渡し
+		tips_ = tips;                //隠し技コマンド　値渡し
 	}
+	//デストラクタ
+	Player::~Player()
+	{
 
+	}
 	//プレイヤー移動
-	void Player::p_move(int key)
+	void Player::p_move(const int& key)
 	{
 		switch (key)
 		{
@@ -243,7 +246,7 @@ namespace game
 	}
 
 	//ｈｐ制御
-	void Player::p_receiving_atk(float hp)
+	void Player::p_receiving_atk(const float& hp)
 	{
 		//エネミーのプロジェクトを取得する
 		auto b = getEnemyPrt();
@@ -299,6 +302,17 @@ namespace game
 		//枠描画
 		graph::Draw_Box(hp_draw_left, hp_draw_top, hp_draw_right, hp_draw_bottom, 0.05f,
 			ARGB(255, 255, 0, 0), ARGB(255, 255, 0, 0), 1, 0);
+		//MP描字
+		//float型をstring型へ変化するため用意
+		ostringstream o_hp[2];
+		string s_hp[2];
+		o_hp[0] << Max_hp;
+		o_hp[1] << (int)(hp_draw_change - hp_draw_left);
+		s_hp[0].operator=(o_hp[0].str());
+		s_hp[1].operator=(o_hp[1].str());
+		font::Draw_FontTextNC(hp_draw_left + 2, hp_draw_top - 4, 0.045f, s_hp[1] + "/" + s_hp[0], ARGB(255, 255, 0, 0), 0);
+		o_hp[0].clear();
+		o_hp[1].clear();
 	}
 	//mpの描画
 	void Player::p_drawMp()
@@ -335,7 +349,7 @@ namespace game
 	//加速度移動する時に影を生成
 	void Player::p_shadow()
 	{
-		//毎2フレームで影を生成する
+		//毎4フレームで影を生成する
 		++shadow_count;
 		if (shadow_count > 3)
 		{

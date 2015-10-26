@@ -4,6 +4,7 @@
 #include "../../lib/ci_ext/DrawObj.hpp"
 #include "../../lib/CharBase.h"
 #include "movableObject.h"
+#include <sstream>
 
 namespace game
 {
@@ -51,7 +52,8 @@ namespace game
 		std::shared_ptr<Stage> getStagePrt();
 		std::shared_ptr<Enemy> getEnemyPrt();
 	public:
-		Player(const std::string& obejctName, int tips);
+		Player(const std::string& obejctName,const int& tips);
+		~Player();
 
 		//プレイヤー動作関数ポインタの宣言
 		typedef void(Player::*move)();
@@ -59,10 +61,10 @@ namespace game
 		int playerHpRight();
 		float playerHp();
 		float playerMaxHp();
-		void p_receiving_atk(float hp);
+		void p_receiving_atk(const float& hp);
 		void p_defense_atkshow();
 		void p_getmousepos();
-		void p_move(int key);
+		void p_move(const int& key);
 		void p_drawHp();
 		void p_result();
 		void p_shadow();

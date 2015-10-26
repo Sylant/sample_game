@@ -16,7 +16,7 @@ namespace game
 		enum e_mode{ NORMAL, ATTACK , DIED };
 		enum e_Dir{ LEFT, RIGHT };
 		
-		int num;
+		int num_;
 		int dir_;
 		int state_;
 		int frame_;
@@ -24,6 +24,7 @@ namespace game
 		int s2_count_;
 		int shot_count;
 		int get_s2_count;
+		int is_s2_count;
 		int boss_w;
 		int boss_h;
 		int s1_probability;
@@ -43,9 +44,10 @@ namespace game
 		std::shared_ptr<Stage> getStagePrt();
 	public:
 		Enemy(const std::string& objectName);
+		~Enemy();
 
 		bool diedshow();
-		void s2_count(int num);
+		void s2_count(const int& num);
 		void e_speceatk();
 		void e_anim();
 		void e_move();

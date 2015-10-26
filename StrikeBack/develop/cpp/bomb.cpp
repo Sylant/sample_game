@@ -24,7 +24,11 @@ namespace game
 		//プレイヤーの値を返し
 		return player;
 	}
+	//デストラクタ
+	bomb::~bomb()
+	{
 
+	}
 	void bomb::render()
 	{
 		MovableObject::render();
@@ -37,25 +41,28 @@ namespace game
 	//エネミー一般攻撃爆発アニメ
 	//bomb1_x , bomb1_y  アニメ位置
 	//bomb1_s    画像拡大縮小の倍率
-	bomb1::bomb1(const std::string& objectName, float bomb1_x, float bomb1_y, float bomb1_s) :
+	bomb1::bomb1(const std::string& objectName, const float& bomb1_x, const float& bomb1_y, const float& bomb1_s) :
 		bomb(objectName)
 	{
-		//画像の読み込み
-		graph::Draw_LoadObject("e_explode", "res/gra/Enemy/explode.png", 0x00000000);
 		//画像のサイズを取得
-		bomb1_w = graph::Draw_GetImageWidth("e_explode") / 29;
-		bomb1_h = graph::Draw_GetImageHeight("e_explode");
+		bomb1_w = graph::Draw_GetImageWidth("e_explosion") / 29;
+		bomb1_h = graph::Draw_GetImageHeight("e_explosion");
 		//初期化
 		setScale(Vec3f(bomb1_s, bomb1_s, 0.f));
 		setPos(Vec3f(bomb1_x, bomb1_y, 0.1f));
 		setSrcSize(Vec3f((float)bomb1_w, (float)bomb1_h, 0.f));
-		resname_ = "e_explode";
+		resname_ = "e_explosion";
 		//アニメ
 		//SetAnim（obejctname，繰り返しアニメ枚数，アニメスピード）
 		charabase::SetAnim(anim_, 30, 0.4f);
 		animMax_ = 29;
 		//SE
-		se::DSound_Play("e_explode");
+		se::DSound_Play("e_explosion");
+	}
+	//デストラクタ
+	bomb1::~bomb1()
+	{
+
 	}
 	//アニメ
 	void bomb1::b1_anim()
@@ -87,11 +94,9 @@ namespace game
 	//攻撃判定はここで取る
 	//bomb2_x , bomb2_y  アニメ位置
 	//bomb2_s    画像拡大縮小の倍率
-	bomb2::bomb2(const std::string& objectName, float bomb2_x, float bomb2_y, float bomb2_s) :
+	bomb2::bomb2(const std::string& objectName, const float& bomb2_x, const float& bomb2_y, const float& bomb2_s) :
 		bomb(objectName)
 	{
-		//画像の読み込み
-		graph::Draw_LoadObject("bomb2", "res/gra/Enemy/mini_explode.png", 0x00000000);
 		//画像のサイズを取得
 		bomb2_w = graph::Draw_GetImageWidth("bomb2") / 28;
 		bomb2_h = graph::Draw_GetImageHeight("bomb2");
@@ -129,6 +134,11 @@ namespace game
 		{
 			kill();
 		}
+	}
+	//デストラクタ
+	bomb2::~bomb2()
+	{
+
 	}
 	//攻め判定更新
 	void bomb2::b2_setoffense()
@@ -170,11 +180,9 @@ namespace game
 	//道具ゲットアニメ
 	//bomb3_x , bomb3_y  アニメ位置
 	//bomb3_s    画像拡大縮小の倍率
-	bomb3::bomb3(const std::string& objectName, float bomb3_x, float bomb3_y, float bomb3_s) :
+	bomb3::bomb3(const std::string& objectName, const float& bomb3_x, const float& bomb3_y, const float& bomb3_s) :
 		bomb(objectName)
 	{
-		//画像の読み込み
-		graph::Draw_LoadObject("get_tool", "res/gra/Player/esc.png", 0x00000000);
 		//画像のサイズを取得
 		bomb3_w = graph::Draw_GetImageWidth("get_tool") / 6;
 		bomb3_h = graph::Draw_GetImageHeight("get_tool");
@@ -188,6 +196,11 @@ namespace game
 		animMax_ = 6;
 		//SE
 		se::DSound_Play("tool_get");
+	}
+	//デストラクタ
+	bomb3::~bomb3()
+	{
+
 	}
 	//アニメ
 	void bomb3::b3_anim()
@@ -218,19 +231,17 @@ namespace game
 	//攻め判定はここで行い
 	//bomb4_x , bomb4_y  アニメ位置
 	//bomb4_s    画像拡大縮小の倍率
-	bomb4::bomb4(const std::string& objectName, float bomb4_x, float bomb4_y, float bomb4_s) :
+	bomb4::bomb4(const std::string& objectName, const float& bomb4_x, const float& bomb4_y, const float& bomb4_s) :
 		bomb(objectName)
 	{
-		//画像の読み込み
-		graph::Draw_LoadObject("ld_explode", "res/gra/Enemy/ld_explode.png", 0xFFFFFFFF);
 		//画像のサイズを取得
-		bomb4_w = graph::Draw_GetImageWidth("ld_explode") / 15;
-		bomb4_h = graph::Draw_GetImageHeight("ld_explode");
+		bomb4_w = graph::Draw_GetImageWidth("ld_explosion") / 15;
+		bomb4_h = graph::Draw_GetImageHeight("ld_explosion");
 		//初期化
 		setScale(Vec3f(bomb4_s, bomb4_s, 0.f));
 		setPos(Vec3f(bomb4_x, bomb4_y, 0.1f));
 		setSrcSize(Vec3f((float)bomb4_w, (float)bomb4_h, 0.f));
-		resname_ = "ld_explode";
+		resname_ = "ld_explosion";
 		//アニメ
 		charabase::SetAnim(anim_, 16, 0.3f);
 		animMax_ = 15;
@@ -245,6 +256,11 @@ namespace game
 		atk_ = 0.f;
 		//プレイヤーの最大ｈｐにより攻撃倍数
 		atk_times = 0.03f;
+	}
+	//デストラクタ
+	bomb4::~bomb4()
+	{
+
 	}
 	//アニメ
 	void bomb4::b4_anim()
@@ -298,19 +314,17 @@ namespace game
 	//攻撃判定ここで行い
 	//bomb5_x , bomb5_y  アニメ位置
 	//bomb5_s    画像拡大縮小の倍率
-	bomb5::bomb5(const std::string& objectName, float bomb5_x, float bomb5_y, float bomb5_s) :
+	bomb5::bomb5(const std::string& objectName, const float& bomb5_x, const float& bomb5_y, const float& bomb5_s) :
 		bomb(objectName)
 	{
-		//画像の読み込み
-		graph::Draw_LoadObject("ufo_explode", "res/gra/Enemy/ufo_explode.png");
 		//画像のサイズを取得
-		bomb5_w = graph::Draw_GetImageWidth("ufo_explode") / 7;
-		bomb5_h = graph::Draw_GetImageHeight("ufo_explode");
+		bomb5_w = graph::Draw_GetImageWidth("ufo_explosion") / 7;
+		bomb5_h = graph::Draw_GetImageHeight("ufo_explosion");
 		//初期化
 		setScale(Vec3f(bomb5_s, bomb5_s, 0.f));
 		setPos(Vec3f(bomb5_x, bomb5_y, 0.1f));
 		setSrcSize(Vec3f((float)bomb5_w, (float)bomb5_h, 0.f));
-		resname_ = "ufo_explode";
+		resname_ = "ufo_explosion";
 		//アニメ
 		charabase::SetAnim(anim_, 8, 0.17f);
 		animMax_ = 7;
@@ -341,6 +355,11 @@ namespace game
 		{
 			kill();
 		}
+	}
+	//デストラクタ
+	bomb5::~bomb5()
+	{
+
 	}
 	//攻め判定更新
 	void bomb5::b5_setoffense()
@@ -379,24 +398,27 @@ namespace game
 	//一般爆発アニメ
 	//bomb6_x , bomb6_y  アニメ位置
 	//bomb6_s    画像拡大縮小の倍率
-	bomb6::bomb6(const std::string& objectName, float bomb6_x, float bomb6_y, float bomb6_s) :
+	bomb6::bomb6(const std::string& objectName, const float& bomb6_x, const float& bomb6_y, const float& bomb6_s) :
 		bomb(objectName)
 	{
-		//画像の読み込み
-		graph::Draw_LoadObject("all_explode", "res/gra/Player/explode.png", 0x00000000);
 		//画像のサイズを取得
-		bomb6_w = graph::Draw_GetImageWidth("all_explode") / 28;
-		bomb6_h = graph::Draw_GetImageHeight("all_explode");
+		bomb6_w = graph::Draw_GetImageWidth("all_explosion") / 28;
+		bomb6_h = graph::Draw_GetImageHeight("all_explosion");
 		//初期化
 		setScale(Vec3f(bomb6_s, bomb6_s, 0.f));
 		setPos(Vec3f(bomb6_x, bomb6_y, 0.1f));
 		setSrcSize(Vec3f((float)bomb6_w, (float)bomb6_h, 0.f));
-		resname_ = "all_explode";
+		resname_ = "all_explosion";
 		//アニメ
 		charabase::SetAnim(anim_, 29, 0.4f);
 		animMax_ = 28;
 		//SE
-		se::DSound_Play("all_explode");
+		se::DSound_Play("all_explosion");
+	}
+	//デストラクタ
+	bomb6::~bomb6()
+	{
+
 	}
 	//アニメ
 	void bomb6::b6_anim()
@@ -425,22 +447,25 @@ namespace game
 		b6_anim();
 	}
 	//ヘリコプター攻撃爆発アニメ
-	bomb7::bomb7(const std::string& objectName, float bomb7_x, float bomb7_y, float bomb7_s) :
+	bomb7::bomb7(const std::string& objectName, const float& bomb7_x, const float& bomb7_y, const float& bomb7_s) :
 		bomb(objectName)
 	{
-		//画像の読み込み
-		graph::Draw_LoadObject("bullet_explode", "res/gra/Enemy/bullet_explode.png", 0xFFFFFFFF);
 		//画像のサイズを取得
-		bomb7_w = graph::Draw_GetImageWidth("bullet_explode") / 5;
-		bomb7_h = graph::Draw_GetImageHeight("bullet_explode");
+		bomb7_w = graph::Draw_GetImageWidth("bullet_explosion") / 5;
+		bomb7_h = graph::Draw_GetImageHeight("bullet_explosion");
 		//初期化
 		setScale(Vec3f(bomb7_s, bomb7_s, 0.f));
 		setPos(Vec3f(bomb7_x, bomb7_y, 0.1f));
 		setSrcSize(Vec3f((float)bomb7_w, (float)bomb7_h, 0.f));
-		resname_ = "bullet_explode";
+		resname_ = "bullet_explosion";
 		//アニメ
 		charabase::SetAnim(anim_, 6, 0.4f);
 		animMax_ = 5;
+	}
+	//デストラクタ
+	bomb7::~bomb7()
+	{
+
 	}
 	//アニメ
 	void bomb7::b7_anim()
@@ -465,5 +490,55 @@ namespace game
 	{
 		MovableObject::update();
 		b7_anim();
+	}
+
+	//ヘリコプター２投げ爆弾アニメ
+	bomb8::bomb8(const std::string& objectName, const float& bomb8_x, const float& bomb8_y, const float& bomb8_s) :
+		bomb(objectName)
+	{
+		//画像のサイズを取得
+		bomb8_w = graph::Draw_GetImageWidth("tk_explosion") / 7;
+		bomb8_h = graph::Draw_GetImageHeight("tk_explosion");
+		//初期化
+		setScale(Vec3f(bomb8_s, bomb8_s, 0.f));
+		setPos(Vec3f(bomb8_x, bomb8_y, 0.1f));
+		setSrcSize(Vec3f((float)bomb8_w, (float)bomb8_h, 0.f));
+		resname_ = "tk_explosion";
+		//アニメ
+		charabase::SetAnim(anim_, 8, 0.4f);
+		animMax_ = 7;
+	}
+	//デストラクタ
+	bomb8::~bomb8()
+	{
+
+	}
+	//アニメ
+	void bomb8::b8_anim()
+	{
+		int t[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8};
+
+		if (charabase::StepAnim(anim_))
+		{
+			setSrc(Vec3f((float)t[anim_.no], 0.f, 0.f));
+		}
+		else if (anim_.no == 4)
+		{
+//			insertAsChild(new e_shot6_atk());
+		}
+		else if (anim_.no >= animMax_)
+		{
+			kill();
+		}
+	}
+	void bomb8::render()
+	{
+		MovableObject::render();
+	}
+
+	void bomb8::update()
+	{
+		MovableObject::update();
+		b8_anim();
 	}
 }

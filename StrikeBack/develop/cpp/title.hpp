@@ -73,6 +73,11 @@ namespace game
 			//アイコン透明度初期化
 			bgm_alpha_ = 255;
 		}
+		//デストラクタ
+		Title::~Title()
+		{
+
+		}
 
 		void render() override
 		{

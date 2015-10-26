@@ -34,17 +34,17 @@ namespace game
 		bool se_show;
 		bool bgm_show;
 	public:
-		Stage(const std::string& objectName, int tips);
-
+		Stage(const std::string& objectName, const int& tips);
+		~Stage();
 		std::shared_ptr<game::Player> getPlayerPrt();
 
-		int e_kill(int count_);
+		int e_kill(const int& count_);
 		void total();
 		void message();
 		void icon();
 		void volume();
 		void stage_bgm();
-		void result(int result);
+		void result(const int& result);
 		void init() override;
 		void render() override;
 		void update() override;

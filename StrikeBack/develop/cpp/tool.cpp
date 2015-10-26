@@ -25,7 +25,11 @@ namespace game
 	{
 
 	}
+	//デストラクタ
+	Tool::~Tool()
+	{
 
+	}
 	void Tool::render()
 	{
 		MovableObject::render();
@@ -40,8 +44,6 @@ namespace game
 	Tool1::Tool1(const string& objectName) :
 		Tool(objectName)
 	{
-		//画像読み込み
-		graph::Draw_LoadObject("ammo", "res/gra/Player/ammo.png", 0x00000000);
 		//画像のサイズを取得
 		tool1_w = graph::Draw_GetImageWidth("ammo");
 		tool1_h = graph::Draw_GetImageHeight("ammo");
@@ -61,6 +63,11 @@ namespace game
 		p_hp = 0;          //プレイヤー損したｈｐ
 		healing_ = 0.f;    //回復値初期化
 		heal_using = 0.1f; //プレイヤーの最大ｈｐにより回復倍数
+	}
+	//デストラクタ
+	Tool1::~Tool1()
+	{
+
 	}
 	//判定更新
 	void Tool1::t1_setoffense()

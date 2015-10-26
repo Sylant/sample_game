@@ -27,8 +27,6 @@ namespace game
 		MovableObject(
 			DrawObjf(objectName, Vec3f::one(), Vec3f::one(), "boss", Vec3f::zero(), Vec3f(230.f, 185.f, 0.f), Color(0xFFFFFFFF), 0))
 	{
-		//描画の読み込み
-		graph::Draw_LoadObject("boss", "res/gra/Enemy/boss.png");
 		//画像のサイズを取得
 		boss_w = graph::Draw_GetImageWidth("boss") / 11;
 		boss_h = graph::Draw_GetImageHeight("boss") / 4;
@@ -55,7 +53,8 @@ namespace game
 		max_probability_times = 0.4f;      //最低確率を確報ための最大確率の倍率数
 		init_moving_speed = 1.f;           //初期移動速度
 		moving_speed = 0.f;                //移動速度初期化
-		get_s2_count = 0;                  //ショット２カウント　最大数を抑える
+		get_s2_count = 0;                  //ショット２カウント　現存数
+		is_s2_count = 3;                   //ショット２カウント　最大数+3
 		shot_count = 3;                    //ショットは一回で何個か呼ばれるか制御する
 		Max_hp = 300.f;                    //最大ｈｐ
 		hp_ = 300.f;                       //現時点のｈｐ
@@ -66,6 +65,10 @@ namespace game
 		hide_atk = false;                  //初期隠す、当たり判定はそのまま存在する
 		alpha_ = 0;                        //透明度０に
 		setColor(alpha_, 255, 255, 255);   //描画色を初期化
+	}
+	Enemy::~Enemy()
+	{
+
 	}
 	//ボス移動
 	void Enemy::e_move()
@@ -145,14 +148,14 @@ namespace game
 			
 			if (atk_show)
 			{
-				//スキル2が二つ以上存在すれば、呼び出しことできないに設定
-				if (get_s2_count <= 1)
+				//スキル2が3 + 3以上存在すれば、呼び出しことできないに設定
+				if (get_s2_count <= is_s2_count)
 				{
 					for (int i = 0;i < shot_count;++i)
 					{
 						insertAsChild(new e_shot2("mini", pos().x(), pos().y(), i));
+						++get_s2_count;
 					}
-					++get_s2_count;
 				}
 				//hpの変化により三つのパタンを分けて、攻撃強度変化する
 				if (hp_ >= Max_hp * 0.7f)
@@ -287,9 +290,14 @@ namespace game
 	}
 
 	//スキル２制御
-	void Enemy::s2_count(int num)
+	void Enemy::s2_count(const int& num)
 	{
-		if (num > 0) --get_s2_count;
+		num_ = num;
+		if (num_ == 1)
+		{
+			num_ = 0;
+			get_s2_count -= 1;
+		}
 	}
 	
 	//やられた状態を値でプレイヤーに渡し
@@ -347,6 +355,6 @@ namespace game
 		e_hide_it();
 		e_speceatk();
 		e_setdefense();
-		s2_count(num);
+		s2_count(num_);
 	}
 }
