@@ -46,4 +46,4 @@ v1.06
 
 ・ゲーム内の素材、音声はすべてはインターネット上のフリー素材を使っています。
 
-動作鑑賞: https://www.youtube.com/watch?v=-ClltZTjmQ4
+動作鑑賞: https://youtu.be/-ClltZTjmQ4
