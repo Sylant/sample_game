@@ -104,7 +104,7 @@ namespace game
 		if (pos().y() < 0) kill();
 		if (pos().y() > p_posY + 63 / 2 )
 		{
-			insertAsChild(new bomb7("bullet_exlode", pos().x(), pos().y(), 2.f));
+			insertToParent(new bomb7("bullet_exlode", pos().x(), pos().y(), 2.f));
 			kill();
 		}
 	}
@@ -161,7 +161,12 @@ namespace game
 		SetRect(&offenseRect, 0, 0, shot1_w, shot1_h);
 		OffsetRect(&offenseRect, ix() - halfsize<int>().x(), iy() - halfsize<int>().y());
         //攻撃判定を一回だけに
-		s1_show = true;
+		atk_show = true;
+		//攻撃力初期化
+//      atk_ = 0.f          //プレイヤーの最大ｈｐにより攻撃を計算する場合
+		atk_ = 30.f;
+		//プレイヤーの最大ｈｐにより攻撃倍数
+//		atk_times = 0.03f;
 	}
 	//デストラクタ
 	e_shot1::~e_shot1()
@@ -196,10 +201,13 @@ namespace game
 	void e_shot1::offenseHit(std::weak_ptr<ci_ext::Object>&)
 	{
 		auto p = getPlayerPrt();
-		if (s1_show)
+		//プレイヤーのｈｐ設定により攻撃力変化する
+//		atk_ = p->playerMaxHp() * atk_times;
+		//プレイヤーのｈｐ設定により攻撃力変化しないなら、攻撃力で計算する
+		if (atk_show)
 		{
-			p->p_receiving_atk(10);
-			s1_show = false;
+			p->p_receiving_atk(atk_);
+			atk_show = false;
 		}
 	}
 
@@ -244,7 +252,7 @@ namespace game
 		//初期化
 		state_ = s2_mode::NORMAL; //初期は一般状態
 		
-		s2_speed_ = 2.f;          //落下した移動するスピード
+		s2_speed2 = 2.f;          //落下した移動するスピード
 		atk_count = 3;            //攻撃カウント数
 		down_ = true;             //落下判定
 		atk_show = true;          //攻撃状態の判定
@@ -252,6 +260,7 @@ namespace game
 		hp_ = 6;                  //hp
 		num_ = num;               //呼びかけたショット２の数
 		frame_ = 0;               //加算するフレーム数初期化
+		exp_ = 6.f;               //Ｅｘｐ
 	}
 	//デストラクタ
 	e_shot2::~e_shot2()
@@ -287,7 +296,7 @@ namespace game
 			velocity_.y(0.f);
 			if (pos().x() > p->pos().x())
 			{
-				velocity_.x(-s2_speed_);
+				velocity_.x(-s2_speed2);
 				//位置はプレイヤーより120.fの距離で停止して、攻撃する
 				if (pos().x() + (float)((num_)* 30.f) < p->pos().x() + 120.f)
 				{
@@ -296,7 +305,7 @@ namespace game
 			}
 			else if (pos().x() < p->pos().x())
 			{
-				velocity_.x(s2_speed_);
+				velocity_.x(s2_speed2);
 				if (pos().x() - (float)((num_)* 30.f) > p->pos().x() - 120.f)
 				{
 					velocity_.x(0.f);
@@ -316,7 +325,7 @@ namespace game
 
 			if (atk_show && atk_count > 0)
 			{
-				insertAsChild(new e_shot2_atk("lightning", p->pos().x()));
+				insertToParent(new e_shot2_atk("lightning", p->pos().x()));
 				atk_show = false;
 				//カウントで計数、攻撃は3回まで
 				--atk_count;
@@ -333,7 +342,7 @@ namespace game
 			if (atk_show && atk_count == 0)
 			{
 				velocity_.x(0.f);
-				velocity_.y(s2_speed_);
+				velocity_.y(s2_speed2);
 				//追撃モードに変化
 				if (y() > p_posY - 10.f)
 				{
@@ -345,7 +354,7 @@ namespace game
 		//追撃モード
 		case s2_mode::SUICIDE:
 		{
-			velocity_.x(s2_speed_ * 1.5f);
+			velocity_.x(s2_speed2 * 1.5f);
 			velocity_.y(0.f);
 			//加速度に設定
 			++frame_;
@@ -353,11 +362,11 @@ namespace game
 			{
 				if (pos().x() > p->pos().x())
 				{
-					velocity_.x(-s2_speed_ * velocity_.x());
+					velocity_.x(-s2_speed2 * velocity_.x());
 				}
 				else if (pos().x() < p->pos().x())
 				{
-					velocity_.x(s2_speed_ * velocity_.x());
+					velocity_.x(s2_speed2 * velocity_.x());
 				}
 			}
 			else
@@ -440,7 +449,9 @@ namespace game
 		{
 			state_ = s2_mode::DIED;
 			auto s = getStagePrt();
+			auto p = getPlayerPrt();
 			s->e_kill(1);
+			p->p_exp(exp_);
 		}
 	}
 
@@ -476,9 +487,10 @@ namespace game
 		//SE
 	    se::DSound_Play("light");
 		//攻撃力初期化
-		atk_ = 0.f;
+//      atk_ = 0.f          //プレイヤーの最大ｈｐにより攻撃を計算する場合
+		atk_ = 10.f;
 		//プレイヤーの最大ｈｐにより攻撃倍数
-		atk_times = 0.03f;
+//		atk_times = 0.03f;
 	}
 	//デストラクタ
 	e_shot2_atk::~e_shot2_atk()
@@ -498,9 +510,8 @@ namespace game
 		//プレイヤーのオブジェクトを取得
 		auto p = getPlayerPrt();
 		//プレイヤーのｈｐ設定により攻撃力変化する
-		atk_ = p->playerMaxHp() * atk_times;
-		//プレイヤーのｈｐ設定により攻撃力変化しない
-//		atk_ = atk_ * atk_using;
+//		atk_ = p->playerMaxHp() * atk_times;
+        //プレイヤーのｈｐ設定により攻撃力変化しないなら、攻撃力で計算する
 		if (s2_atk_show)
 		{
 			p->p_receiving_atk(atk_);
@@ -561,6 +572,8 @@ namespace game
 		hp_ = 3;
 		//加算するフレーム数初期化
 		frame_ = 0;
+		//exp
+		exp_ = 10.f;
 	}
 	//デストラクタ
 	e_shot3::~e_shot3()
@@ -607,6 +620,8 @@ namespace game
 		{
 			insertToParent(new bomb6("bomb6", pos().x(), y() - 40.f, math::GetRandom(1.5f, 2.f)));
 			auto s = getStagePrt();
+			auto p = getPlayerPrt();
+			p->p_exp(exp_);
 			s->e_kill(1);
 			kill();
 		}
@@ -655,6 +670,7 @@ namespace game
 		alpha_ = 0;                       //初期は透明に
 		setColor(alpha_, 255, 255, 255);  //ARGB
 		hp_ = 6;                          //hp
+		exp_ = 6.f;                       //exp
 	}
 	//デストラクタ
 	e_shot4::~e_shot4()
@@ -733,6 +749,8 @@ namespace game
 		{
 			insertToParent(new bomb6("all_explode", pos().x(), pos().y(), math::GetRandom(2.f, 2.5f)));
 			auto s = getStagePrt();
+			auto p = getPlayerPrt();
+			p->p_exp(exp_);
 			s->e_kill(1);
 			kill();
 		}
@@ -801,7 +819,7 @@ namespace game
 	}
 
 	//エネミーショット５　ヘリコプター
-	e_shot5::e_shot5(const string& objectName) :
+	e_shot5::e_shot5(const string& objectName, const int& num) :
 		shot(objectName)
 	{
 		//画像のサイズを取得
@@ -821,11 +839,35 @@ namespace game
 		setPos(Vec3f(posX_, -10.f, 0.2f));
 		//初期モード
 		state_ = s5_mode::NORMAL;
+		//３つの種類に別け
+		if (num == 1)
+		{
+			hp_ = 6;                               //ｈｐ
+			exp_ = 6.f;                            //exp
+			max_frame = 540;                       //フレーム数経ったら、上昇する
+			type_ = s5_type::type1;                //タイプ確認
+			setColor(ARGB(255, 255, 255, 255));    //タイプより色を変化
+		}
+		else if (num == 2)
+		{
+			hp_ = 8;
+			exp_ = 8.f;
+			max_frame = 480;
+			type_ = s5_type::type2;
+			setColor(ARGB(255, 255, 150, 150));
+		}
+		else if (num == 3)
+		{
+			hp_ = 10;
+			exp_ = 10.f;
+			max_frame = 420;
+			type_ = s5_type::type3;
+			setColor(ARGB(255, 150, 255, 150));
+		}
 		//初期化
 		atk_show = false;       //攻撃状態
 		frame_ = 0;             //落下と上昇のフレーム数
 		moving_speed = 0.6f;    //移動速度
-		hp_ = 6;                //hp
 	}
 	//デストラクタ
 	e_shot5::~e_shot5()
@@ -845,7 +887,6 @@ namespace game
 			if (y() > 50.f)
 			{
 				state_ = s5_mode::ATTACK;
-				atk_show = true;
 			}
 		}
 		break;
@@ -854,29 +895,49 @@ namespace game
 			velocity_.y(0.f);
 			//カウント数で攻撃をセットする
 			frame_++;
-			//60フレーム一回攻撃
-			if (frame_ == 120 || frame_ == 180)
+			//フレーム数で攻撃回数を制御
+			if (type_ == s5_type::type1)
 			{
-				atk_show = true;
+				if (frame_ == max_frame / 4 || frame_ == (max_frame / 4 + 60))
+					atk_show = true;
 			}
-			//攻撃3回　8発 x 3
+			else if (type_ == s5_type::type2)
+			{
+				if (frame_ == max_frame / 5)
+					atk_show = true;
+			}
+			else if (type_ == s5_type::type3)
+			{
+				if (frame_ == max_frame / 6)
+					atk_show = true;
+			}
+			//攻撃
 			if (atk_show)
 			{
-				se::DSound_Play("e_bullet");
-				for (int i = 0;i <= 6;++i)
+				if (type_ == s5_type::type1)
 				{
-					insertAsChild(new e_shot5_atk("e_bullet", pos().x(), pos().y(), i * 15.f));
+					se::DSound_Play("e_bullet");
+					for (int i = 0;i <= 6;++i)
+						insertToParent(new e_shot5_atk("e_bullet", pos().x(), pos().y(), i * 15.f));
+				}
+				else if (type_ == s5_type::type2)
+				{
+					se::DSound_Play("throw");
+					insertToParent(new e_shot5_throw("track", pos().x(), pos().y(), 1.f));
+				}
+				else if (type_ == s5_type::type3)
+				{
+					se::DSound_Play("throw");
+					insertToParent(new e_shot5_throw2("track", pos().x(), pos().y(), 1.f));
 				}
 				atk_show = false;
 			}
-			//420フレーム後、上昇する
-			else if (frame_ >= 480)
+			//最大フレーム超えたら、上昇する
+			else if (frame_ >= max_frame)
 			{
 				velocity_.y(-1.f);
 				if (y() < 0.f)
-				{
 					kill();
-				}
 			}
 		}
 		    break;
@@ -912,7 +973,9 @@ namespace game
 		{
 			insertToParent(new bomb6("bomb6", pos().x(), pos().y(), math::GetRandom(2.f, 2.5f)));
 			auto s = getStagePrt();
+			auto p = getPlayerPrt();
 			s->e_kill(1);
+			p->p_exp(exp_);
 			kill();
 		}
 	}
@@ -946,9 +1009,10 @@ namespace game
 		SetRect(&offenseRect, 0, 0, s5_atk_w, s5_atk_h);
 		OffsetRect(&offenseRect, ix() - halfsize<int>().x(), iy() - halfsize<int>().y());
 		//攻撃力初期化
-		atk_ = 0.f;
+//      atk_ = 0.f          //プレイヤーの最大ｈｐにより攻撃を計算する場合
+		atk_ = 5.f;
 		//プレイヤーの最大ｈｐにより攻撃倍数
-		atk_times = 0.02f;
+//		atk_times = 0.02f;
 		//攻撃判定を一回だけに
 		atk_show = true;
 	}
@@ -988,9 +1052,8 @@ namespace game
 		//プレイヤーのオブジェクトを取得
 		auto p = getPlayerPrt();
 		//プレイヤーのｈｐ設定により攻撃力変化する
-		atk_ = p->playerMaxHp() * atk_times;
-		//プレイヤーのｈｐ設定により攻撃力変化しない
-//		atk_ = atk_ * atk_using;
+//		atk_ = p->playerMaxHp() * atk_times;
+		//プレイヤーのｈｐ設定により攻撃力変化しないなら、攻撃力で計算する
 		if (atk_show)
 		{
 			p->p_receiving_atk(atk_);
@@ -1006,233 +1069,136 @@ namespace game
 		s5a_out();
 		s5a_setoffense();
 	}
-/*  //追加予定
-	//エネミーショット６　ヘリコプター２
-	e_shot6::e_shot6(const string& objectName) :
+
+	//ヘリコプター 爆弾投げ
+	e_shot5_throw::e_shot5_throw(const string& objectName, const float& posX, const float& posY, const float& scale) :
 		shot(objectName)
 	{
 		//画像のサイズを取得
-		shot6_w = graph::Draw_GetImageWidth("heli") / 4;
-		shot6_h = graph::Draw_GetImageHeight("heli");
+		s5_throw_w = graph::Draw_GetImageWidth("rotate");
+		s5_throw_h = graph::Draw_GetImageHeight("rotate");
 		//初期化
-		setScale(Vec3f(1.f, 1.f, 0.f));
-		setSrcSize(Vec3f((float)shot6_w, (float)shot6_h, 0.f));
-		setColor(ARGB(255, 255, 150, 150)); //色を変化させる
-		resname_ = "heli";
-		//アニメ設定
-		charabase::SetAnim(anim_, 4, 0.8f);
+		setScale(Vec3f(scale, scale, 0.f));
+		setSrcSize(Vec3f((float)s5_throw_w, (float)s5_throw_h, 0.f));
+		setPos(Vec3f(posX, posY + 15.f, 0.2f));
+		resname_ = "rotate";
 		//受け判定
-		SetRect(&defenseRect, 0, 0, shot6_w, shot6_h);
-		OffsetRect(&defenseRect, ix() - halfsize<int>().x(), iy() - halfsize<int>().y());
-		//確率で出現　初期位置は画面外
-		posX_ = (float)math::GetRandom(shot6_w / 2, system::WINW - shot6_w / 2);
-		setPos(Vec3f(posX_, -10.f, 0.2f));
-		//初期モード
-		state_ = s6_mode::NORMAL;
-		//初期化
-		atk_show = false;       //攻撃状態
-		frame_ = 0;             //落下と上昇のフレーム数
-		moving_speed = 0.6f;    //移動速度
-		hp_ = 8;                //hp
-	}
-	//デストラクタ
-	e_shot6::~e_shot6()
-	{
-
-	}
-	//ヘリコプター移動
-	void e_shot6::s6_move()
-	{
-		velocity_.y(moving_speed);
-
-		switch (state_)
-		{
-		case s6_mode::NORMAL:
-		{
-			//設定位置に着いたら、攻撃モードに
-			if (y() > 50.f)
-			{
-				state_ = s6_mode::ATTACK;
-				atk_show = true;
-			}
-		}
-		break;
-		case s6_mode::ATTACK:
-		{
-			velocity_.y(0.f);
-			//カウント数で攻撃をセットする
-			frame_++;
-			//90フレームに一回攻撃
-			if (frame_ == 90)
-			{
-				atk_show = true;
-			}
-			//攻撃
-			if (atk_show)
-			{
-				se::DSound_Play("e_bullet");
-				insertAsChild(new e_shot6_thorw("track", pos().x(), pos().y()));
-				atk_show = false;
-			}
-			//420フレーム後、上昇する
-			else if (frame_ >= 420)
-			{
-				velocity_.y(-1.f);
-				if (y() < 0.f)
-				{
-					kill();
-				}
-			}
-		}
-		break;
-		}
-	}
-	//アニメ
-	void e_shot6::s6_anim()
-	{
-		int t[] = { 0, 1, 2, 3, 4 };
-		if (charabase::StepAnim(anim_))
-		{
-			setSrc(Vec3f((float)t[anim_.no], 0.f, 0.f));
-		}
-	}
-	//受け判定更新
-	void e_shot6::s6_setdefense()
-	{
-		SetRect(&defenseRect, (int)(ix() - shot6_w / 2), (int)(iy() - shot6_h / 2),
-			(int)(ix() + shot6_w / 2), (int)(iy() + shot6_h / 2));
-	}
-
-	void e_shot6::render()
-	{
-		MovableObject::render();
-		//判定チェックRECT
-		//		graph::Draw_CkRect(defenseRect, ARGB(255, 0, 0, 255));
-	}
-	//やられた時に呼ぶ
-	void e_shot6::defenseHit(std::weak_ptr<ci_ext::Object>&)
-	{
-		--hp_;
-		if (hp_ < 0)
-		{
-			insertToParent(new bomb6("bomb6", pos().x(), pos().y(), math::GetRandom(2.f, 2.5f)));
-			auto s = getStagePrt();
-			s->e_kill(1);
-			kill();
-		}
-	}
-
-	void e_shot6::update()
-	{
-		MovableObject::update();
-
-		s6_move();
-		s6_anim();
-		s6_setdefense();
-	}
-	//ヘリコプターの爆弾投げ
-	e_shot6_thorw::e_shot6_thorw(const string& objectName, const float& posX, const float& posY) :
-		shot(objectName)
-	{
-		//画像のサイズを取得
-		s6_thorw_w = graph::Draw_GetImageWidth("track");
-		s6_thorw_h = graph::Draw_GetImageHeight("track");
-		//初期化
-		setScale(Vec3f(1.f, 1.f, 0.f));
-		setSrcSize(Vec3f((float)s6_thorw_w, (float)s6_thorw_h, 0.f));
-		setPos(Vec3f(posX, posY + 15.f, 0.25f));
-		resname_ = "track";
-		//受け判定
-		SetRect(&defenseRect, 0, 0, s6_thorw_w, s6_thorw_h);
+		SetRect(&defenseRect, 0, 0, s5_throw_w, s5_throw_h);
 		OffsetRect(&defenseRect, ix() - halfsize<int>().x(), iy() - halfsize<int>().y());
 		//移動速度
-		velocity_.y(1.f);
+		velocity_.y(2.f);
+		//発射数
+		fire_ = 8;
 		//hp
 		hp_ = 4;
+		//exp
+		exp_ = 4.f;
 	}
 	//デストラクタ
-	e_shot6_thorw::~e_shot6_thorw()
+	e_shot5_throw::~e_shot5_throw()
 	{
 
 	}
 	//行動
-	void e_shot6_thorw::s6t_move()
+	void e_shot5_throw::s5t_move()
 	{
-		if (pos().y() > (system::WINH / 2 + (int)p_posY))
+		if (pos().y() > system::WINH / 2 - s5_throw_h * 2)
 		{
 			velocity_.y(0.f);
-			insertToParent(new bomb8("tk_explosion", pos().x(), pos().y(), 1.f));
+			insertToParent(new bomb8("tk_explosion", pos().x(), pos().y(), 1.5f));
+			for (int i = 0;i <= fire_;++i)
+			{
+				insertToParent(new e_shot5_atk2("e_bullet", pos().x(), pos().y(), (float)(i * (360 / fire_))));
+			}
 			kill();
 		}
 	}
 	//受け判定更新
-	void e_shot6_thorw::s6t_setdefense()
+	void e_shot5_throw::s5t_setdefense()
 	{
-		SetRect(&defenseRect, (int)(ix() - s6_thorw_w / 2), (int)(iy() - s6_thorw_h / 2),
-			(int)(ix() + s6_thorw_w / 2), (int)(iy() + s6_thorw_h / 2));
+		SetRect(&defenseRect, (int)(ix() - s5_throw_w / 2), (int)(iy() - s5_throw_h / 2),
+			(int)(ix() + s5_throw_w / 2), (int)(iy() + s5_throw_h / 2));
 	}
 	//やられた時に呼ぶ
-	void e_shot6_thorw::defenseHit(std::weak_ptr<ci_ext::Object>&)
+	void e_shot5_throw::defenseHit(std::weak_ptr<ci_ext::Object>&)
 	{
 		--hp_;
 		if (hp_ < 0)
 		{
 			insertToParent(new bomb6("bomb6", pos().x(), pos().y(), math::GetRandom(1.f, 1.5f)));
+			auto p = getPlayerPrt();
+			p->p_exp(exp_);
 			kill();
 		}
 	}
-	void e_shot6_thorw::render()
+	void e_shot5_throw::render()
 	{
 		MovableObject::render();
 	}
-	void e_shot6_thorw::update()
+	void e_shot5_throw::update()
 	{
 		MovableObject::update();
+		s5t_move();
+		s5t_setdefense();
 	}
 
-	//ヘリコプター２攻撃
-	e_shot6_atk::e_shot6_atk(const string& objectName, const float& p_posX, const float& p_posY, const float& angle) :
+	//ヘリコプター 攻撃2
+	e_shot5_atk2::e_shot5_atk2(const string& objectName, const float& posX, const float& posY, const float& angle) :
 		shot(objectName)
 	{
 		//画像のサイズを取得
-		s6_atk_w = graph::Draw_GetImageWidth("e_bullet");
-		s6_atk_h = graph::Draw_GetImageHeight("e_bullet");
+		s5_atk2_w = graph::Draw_GetImageWidth("e_bullet");
+		s5_atk2_h = graph::Draw_GetImageHeight("e_bullet");
 		//初期化
 		setScale(Vec3f(1.f, 1.f, 0.f));
-		setSrcSize(Vec3f((float)s6_atk_w, (float)s6_atk_h, 0.f));
+		setSrcSize(Vec3f((float)s5_atk2_w, (float)s5_atk2_h, 0.f));
 		resname_ = "e_bullet";
-		setPos(Vec3f(posX, posY + 30.f, 0.25f));
+		setPos(Vec3f(posX, posY, 0.25f));
 		//移動速度
 		atk_speed = 3.f;
+		//弾の移動修正
+		velocity_.x(math::ROUND_X(angle, atk_speed, 0.f));
+		velocity_.y(math::ROUND_Y(angle, atk_speed, 0.f));
 		//攻撃判定
-		SetRect(&offenseRect, 0, 0, s6_atk_w, s6_atk_h);
+		SetRect(&offenseRect, 0, 0, s5_atk2_w, s5_atk2_h);
 		OffsetRect(&offenseRect, ix() - halfsize<int>().x(), iy() - halfsize<int>().y());
 		//攻撃力初期化
-		atk_ = 0.f;
-		//プレイヤーの最大ｈｐにより攻撃倍数
-		atk_times = 0.02f;
-		//攻撃判定を一回だけに
-		atk_show = true;
-		//
-		player_posX = p_posX;
-		player_posY = p_posY;
+//      atk_ = 0.f              //プレイヤーの最大ｈｐにより攻撃を計算する場合
+		atk_ = 5.f;            //攻撃力初期化
+//		atk_times = 0.02f;      //プレイヤーの最大ｈｐにより攻撃倍数
+		atk_show = true;        //攻撃判定を一回だけに
+		distance = 0;           //弾移動時間カウント数
+		is_distance = false;    //二回目の移動チェック
 	}
 	//デストラクタ
-	e_shot6_atk::~e_shot6_atk()
+	e_shot5_atk2::~e_shot5_atk2()
 	{
 
 	}
-
-	void e_shot6_atk::s6a_move()
+	//二回移動
+	void e_shot5_atk2::s5a2_move()
 	{
-		//プレイヤーの位置に攻撃し、それに対する角度を求める
-		targetX_ = math::DegreeOfPoints2(x(), y(), player_posX, player_posY);
-		targetY_ = -math::DegreeOfPoints2(x(), y(), plyaer_posX, player_posY);
-		//角度に対してのX,Yを求める
-		velocity_.x(math::ROUND_X(targetX_, speed_, 0.f));
-		velocity_.y(math::ROUND_Y(targetY_, speed_, 0.f));
+		++distance;
+		if (distance == 30)
+		{
+			sleep(15);
+			is_distance = true;
+		}
+		//プレイヤーに対し位置修正は一回のみ
+		if(is_distance)
+		{
+			is_distance = false;
+			auto p = getPlayerPrt();
+			//プレイヤーの位置に攻撃し、それに対する角度を求める
+			targetX = math::DegreeOfPoints2(x(), y(), p->pos().x(), p->pos().y());
+			targetY = -math::DegreeOfPoints2(x(), y(), p->pos().x(), p->pos().y());
+			//角度に対してのX,Yを求める
+			velocity_.x(math::ROUND_X(targetX, atk_speed + 1.f, 0.f));
+			velocity_.y(math::ROUND_Y(targetY, atk_speed + 1.f, 0.f));
+		}
 	}
-	void e_shot6_atk::s6a_out()
+
+	void e_shot5_atk2::s5a2_out()
 	{
 		//地面にぶつかったら、爆発アニめへ
 		if (y() > p_posY + 28.f)
@@ -1241,31 +1207,30 @@ namespace game
 			kill();
 		}
 		//画面外なら消し
-		if (pos().x() > system::WINW - s6_atk_w / 2) kill();
-		else if (pos().x() < 0 + s6_atk_w / 2) kill();
+		if (pos().x() > system::WINW - s5_atk2_w / 2) kill();
+		else if (pos().x() < 0 + s5_atk2_w / 2) kill();
 	}
 	//攻め判定更新
-	void e_shot6_atk::s6a_setoffense()
+	void e_shot5_atk2::s5a2_setoffense()
 	{
-		SetRect(&offenseRect, (int)(ix() - s6_atk_w / 2), (int)(iy() - s6_atk_h / 2),
-			(int)(ix() + s6_atk_w / 2), (int)(iy() + s6_atk_h / 2));
+		SetRect(&offenseRect, (int)(ix() - s5_atk2_w / 2), (int)(iy() - s5_atk2_h / 2),
+			(int)(ix() + s5_atk2_w / 2), (int)(iy() + s5_atk2_h / 2));
 	}
 
-	void e_shot6_atk::render()
+	void e_shot5_atk2::render()
 	{
 		MovableObject::render();
         //判定チェックRECT
 //		graph::Draw_CkRect(offenseRect, ARGB(255, 0, 0, 255));
 	}
 	//判定はtrueだったら 爆発アニメへ
-	void e_shot6_atk::offenseHit(std::weak_ptr<ci_ext::Object>&)
+	void e_shot5_atk2::offenseHit(std::weak_ptr<ci_ext::Object>&)
 	{
 		//プレイヤーのオブジェクトを取得
 		auto p = getPlayerPrt();
 		//プレイヤーのｈｐ設定により攻撃力変化する
-		atk_ = p->playerMaxHp() * atk_times;
-		//プレイヤーのｈｐ設定により攻撃力変化しない
-		//		atk_ = atk_ * atk_using;
+//		atk_ = p->playerMaxHp() * atk_times;
+		//プレイヤーのｈｐ設定により攻撃力変化しないなら、攻撃力で計算する
 		if (atk_show)
 		{
 			p->p_receiving_atk(atk_);
@@ -1275,11 +1240,177 @@ namespace game
 		kill();
 	}
 
-	void e_shot6_atk::update()
+	void e_shot5_atk2::update()
 	{
 		MovableObject::update();
-		s6a_out();
-		s6a_setoffense();
+		s5a2_move();
+		s5a2_out();
+		s5a2_setoffense();
 	}
-	*/
+
+	//ヘリコプター 爆弾投げ
+	e_shot5_throw2::e_shot5_throw2(const string& objectName, const float& posX, const float& posY, const float& scale) :
+		shot(objectName)
+	{
+		//画像のサイズを取得
+		s5_throw2_w = graph::Draw_GetImageWidth("track");
+		s5_throw2_h = graph::Draw_GetImageHeight("track");
+		//初期化
+		setScale(Vec3f(scale, scale, 0.f));
+		setSrcSize(Vec3f((float)s5_throw2_w, (float)s5_throw2_h, 0.f));
+		setPos(Vec3f(posX, posY + 15.f, 0.2f));
+		resname_ = "track";
+		//受け判定
+		SetRect(&defenseRect, 0, 0, s5_throw2_w, s5_throw2_h);
+		OffsetRect(&defenseRect, ix() - halfsize<int>().x(), iy() - halfsize<int>().y());
+
+		velocity_.y(math::GetRandom(2.5f, 3.5f));  //移動速度
+		fire_ = math::GetRandom(8, 18);            //最大発射数
+		fire_count = 0;                            //発射数カウント
+		del_count = 0;                             //消すカウント数
+		hp_ = 6;                                   //hp
+		atk_show = true;                           //攻撃
+		exp_ = 4.f;		     					   //exp
+	}
+	//デストラクタ
+	e_shot5_throw2::~e_shot5_throw2()
+	{
+
+	}
+	//行動
+	void e_shot5_throw2::s5t2_move()
+	{
+		if (pos().y() > system::WINH / 2 - s5_throw2_h * 2)
+		{
+			++del_count;
+			velocity_.y(0.f);
+			if (atk_show)
+			{
+				++fire_count;
+				insertToParent(new e_shot5_atk3("e_bullet", pos().x(), pos().y(), (float)(fire_count * (360 / fire_))));
+				atk_show = false;
+				if (fire_count > fire_)
+				{
+					sleep(20);
+					fire_count = 0;
+				}
+			}
+			//攻撃回数にかかわらず、６０フレーム後消す
+			if (del_count > 60)
+			{
+				insertToParent(new bomb8("throw_explosion", pos().x(), pos().y(), 1.5f));
+				kill();
+			}
+		}
+		atk_show = true;
+	}
+	//受け判定更新
+	void e_shot5_throw2::s5t2_setdefense()
+	{
+		SetRect(&defenseRect, (int)(ix() - s5_throw2_w / 2), (int)(iy() - s5_throw2_h / 2),
+			(int)(ix() + s5_throw2_w / 2), (int)(iy() + s5_throw2_h / 2));
+	}
+	//やられた時に呼ぶ
+	void e_shot5_throw2::defenseHit(std::weak_ptr<ci_ext::Object>&)
+	{
+		--hp_;
+		if (hp_ < 0)
+		{
+			insertToParent(new bomb6("bomb6", pos().x(), pos().y(), math::GetRandom(1.f, 1.5f)));
+			auto p = getPlayerPrt();
+			p->p_exp(exp_);
+			kill();
+		}
+	}
+	void e_shot5_throw2::render()
+	{
+		MovableObject::render();
+	}
+	void e_shot5_throw2::update()
+	{
+		MovableObject::update();
+		s5t2_move();
+		s5t2_setdefense();
+	}
+
+	//ヘリコプター 攻撃3
+	e_shot5_atk3::e_shot5_atk3(const string& objectName, const float& posX, const float& posY, const float& angle) :
+		shot(objectName)
+	{
+		//画像のサイズを取得
+		s5_atk3_w = graph::Draw_GetImageWidth("e_bullet");
+		s5_atk3_h = graph::Draw_GetImageHeight("e_bullet");
+		//初期化
+		setScale(Vec3f(1.f, 1.f, 0.f));
+		setSrcSize(Vec3f((float)s5_atk3_w, (float)s5_atk3_h, 0.f));
+		resname_ = "e_bullet";
+		setPos(Vec3f(posX, posY, 0.25f));
+		//移動速度
+		atk_speed = 2.5f;
+		//弾の移動修正
+		velocity_.x(math::ROUND_X(angle, atk_speed, 0.f));
+		velocity_.y(math::ROUND_Y(angle, atk_speed, 0.f));
+		//攻撃判定
+		SetRect(&offenseRect, 0, 0, s5_atk3_w, s5_atk3_h);
+		OffsetRect(&offenseRect, ix() - halfsize<int>().x(), iy() - halfsize<int>().y());
+
+//      atk_ = 0.f              //プレイヤーの最大ｈｐにより攻撃を計算する場合
+		atk_ = 5.f;            //攻撃力初期化
+//		atk_times = 0.02f;      //プレイヤーの最大ｈｐにより攻撃倍数
+		atk_show = true;        //攻撃判定を一回だけに
+	}
+	//デストラクタ
+	e_shot5_atk3::~e_shot5_atk3()
+	{
+
+	}
+
+	void e_shot5_atk3::s5a3_out()
+	{
+		//地面にぶつかったら、爆発アニめへ
+		if (y() > p_posY + 28.f)
+		{
+			insertToParent(new bomb7("bullet_exlode", pos().x(), pos().y(), 2.f));
+			kill();
+		}
+		//画面外なら消し
+		if (pos().x() > system::WINW - s5_atk3_w / 2) kill();
+		else if (pos().x() < 0 + s5_atk3_w / 2) kill();
+	}
+	//攻め判定更新
+	void e_shot5_atk3::s5a3_setoffense()
+	{
+		SetRect(&offenseRect, (int)(ix() - s5_atk3_w / 2), (int)(iy() - s5_atk3_h / 2),
+			(int)(ix() + s5_atk3_w / 2), (int)(iy() + s5_atk3_h / 2));
+	}
+
+	void e_shot5_atk3::render()
+	{
+		MovableObject::render();
+		//判定チェックRECT
+//		graph::Draw_CkRect(offenseRect, ARGB(255, 0, 0, 255));
+	}
+	//判定はtrueだったら 爆発アニメへ
+	void e_shot5_atk3::offenseHit(std::weak_ptr<ci_ext::Object>&)
+	{
+		//プレイヤーのオブジェクトを取得
+		auto p = getPlayerPrt();
+		//プレイヤーのｈｐ設定により攻撃力変化する
+//		atk_ = p->playerMaxHp() * atk_times;
+		//プレイヤーのｈｐ設定により攻撃力変化しないなら、攻撃力で計算する
+		if (atk_show)
+		{
+			p->p_receiving_atk(atk_);
+			insertToParent(new bomb7("bomb7", pos().x(), pos().y(), 2.f));
+			atk_show = false;
+		}
+		kill();
+	}
+
+	void e_shot5_atk3::update()
+	{
+		MovableObject::update();
+		s5a3_out();
+		s5a3_setoffense();
+	}
 }

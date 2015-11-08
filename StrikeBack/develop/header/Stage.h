@@ -23,22 +23,28 @@ namespace game
 		int mes_alpha;
 		int mes_count;
 		int icon_alpha;
-		int player_hp;
+		int warn_alpha;
+		int side_alpha;
+		int hide_count;
+		int side_posX;
+		float player_hp;
 		float clear_scale;
 		float over_scale;
 		float mes_scale;
 		float icon_scale;
 		float count_scale;
-		float kill_healing;
-		float kill_heal_using;
+		float kill_regen;
+		float kill_heal_times;
 		bool se_show;
 		bool bgm_show;
+		bool warn_show;
 	public:
 		Stage(const std::string& objectName, const int& tips);
 		~Stage();
 		std::shared_ptr<game::Player> getPlayerPrt();
 
 		int e_kill(const int& count_);
+		void warning();
 		void total();
 		void message();
 		void icon();

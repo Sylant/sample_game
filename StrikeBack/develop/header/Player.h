@@ -17,7 +17,14 @@ namespace game
 	private:
 		enum moveDir { NEUTRAL, LEFT, RIGHT };
 		
+		int level_;
+		int is_level;
+		int lv_count_w;
+		int lv_count_h;
+		int num_1;
+		int num_2;
 		int bullet_;
+		int bullets_;
 		int tips_;
 		int key;
 		int shadow_count;
@@ -31,8 +38,13 @@ namespace game
 		int mp_draw_bottom;
 		int mp_draw_left;
 		int mp_draw_right;
+		int exp_draw_top;
+		int exp_draw_bottom;
+		int exp_draw_left;
+		int exp_draw_right;
 		int mp_count;
 		float hp;
+		float exp;
 		float hp_;
 		float Max_hp;
 		float mp_;
@@ -42,10 +54,17 @@ namespace game
 		float mp_healing;
 		float hp_draw_change;
 		float mp_draw_change;
+		float Max_exp;
+		float exp_;
+		float exp_draw_change;
 		float moving_speed;
 		float init_moving_speed;
+		float angle_;
 		bool def_show;
+		bool self_atk;
 		bool result_;
+		bool kill_2;
+		bool kill_3;
 		POINT mousePos_;
 
 		std::vector<MovableObject> shadow_;
@@ -58,9 +77,11 @@ namespace game
 		//プレイヤー動作関数ポインタの宣言
 		typedef void(Player::*move)();
 
-		int playerHpRight();
 		float playerHp();
 		float playerMaxHp();
+		void p_levelup(const int& level);
+		void p_exp(const float& exp);
+		void p_drawLevel();
 		void p_receiving_atk(const float& hp);
 		void p_defense_atkshow();
 		void p_getmousepos();

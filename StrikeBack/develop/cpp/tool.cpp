@@ -60,9 +60,9 @@ namespace game
 		//初期位置
 		setPos(Vec3f(posX_, posY_, 0.35f));
 
-		p_hp = 0;          //プレイヤー損したｈｐ
-		healing_ = 0.f;    //回復値初期化
-		heal_using = 0.1f; //プレイヤーの最大ｈｐにより回復倍数
+		player_hp = 0;      //回復値
+		regen = 0.f;        //回復理論値初期化
+		regen_times = 0.1f; //プレイヤーの最大ｈｐにより回復倍数、０.１f->１０％
 	}
 	//デストラクタ
 	Tool1::~Tool1()
@@ -81,24 +81,12 @@ namespace game
 		auto p = getPlayerPrt();
 
 		//プレイヤーのｈｐ設定により回復値変化する
-		healing_ = p->playerMaxHp() * heal_using;
-		
-		//hp描画は枠を超えないように
-		if (p->playerHp() >= p->playerHpRight())
-		{
-			p->p_receiving_atk(0);
-		}
-		else if (p->playerHp() < p->playerHpRight())
-		{
-			//hpの描画位置の座標は逆なので、＋と-も逆にする
-			p_hp = p->playerHpRight() - (int)p->playerHp();
-			//損したｈｐは回復値より上回り->回復値で回復する
-			if (p_hp >= (int)healing_)
-				p->p_receiving_atk(-healing_);
-			//損したｈｐは回復値より下回り->損したｈｐだけを回復する
-			else if (p_hp < (int)healing_)
-				p->p_receiving_atk(-(float)p_hp);
-		}
+		regen = p->playerMaxHp() * regen_times;
+		//プレイヤーはＭａｘｈｐなら回復０、それ以来に設定値に回復する
+		player_hp = p->playerHp() >= p->playerMaxHp() ? 0 : regen;
+		if (p->playerHp() + regen > p->playerMaxHp())
+			player_hp = p->playerMaxHp() - p->playerHp();
+		p->p_receiving_atk(-player_hp);
 
 		insertToParent(new bomb3("get_tool", pos().x(), pos().y() - (float)tool1_h, 1.5f));
 		kill();

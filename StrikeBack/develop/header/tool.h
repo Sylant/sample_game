@@ -27,13 +27,13 @@ namespace game
 	class Tool1 : public Tool
 	{
 	private:
-		float healing_;
-		float heal_using;
+		float player_hp;
+		float regen;
+		float regen_times;
 		float posX_;
 		float posY_;
 		int tool1_w;
 		int tool1_h;
-		int p_hp;
 	public:
 		Tool1(const std::string& objectName);
 		~Tool1();

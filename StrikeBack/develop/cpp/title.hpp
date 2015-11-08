@@ -22,6 +22,7 @@ namespace game
 		int exit_h;
 		bool bgmShow_;     //BGMの再生を制御する
 		bool seShow_;      //SEの再生を制御する
+		bool decide_[2];      //選択しを決めるかどうか
 
 	public:
 
@@ -70,6 +71,9 @@ namespace game
 			bgmShow_ = true;
 			//再生かどうか確認する
 			seShow_ = true;
+			//選択しを決めるかどうか確認する
+			decide_[0] = true;
+			decide_[1] = false;
 			//アイコン透明度初期化
 			bgm_alpha_ = 255;
 		}
@@ -110,29 +114,23 @@ namespace game
 			bgm_icon();
 		}
 		//スタートオプション
-		//左クリックしてステージへ
+		//確認してステージへ
 		void start_option()
 		{
-			if (gplib::input::CheckPush(gplib::input::KEY_MOUSE_LBTN))
-			{
-				gplib::se::DSound_Play("button");
-				effect::Create(0, 0, effect::EFFECTTYPE::FADEOUTWHITE);
-				insertToParent(new Stage("stage", tips_));
-				//ステージへ移動する時にも停止させる
-				bgmShow_ = false;
-				kill();
-			}
+			gplib::se::DSound_Play("button");
+			effect::Create(0, 0, effect::EFFECTTYPE::FADEOUTWHITE);
+			insertToParent(new Stage("stage", tips_));
+			//ステージへ移動する時にも停止させる
+			bgmShow_ = false;
+			kill();
 		}
 		//エグジットオプション
-		//左クリックして終了に
+		//確認して終了に
 		void exit_option()
 		{
-			if (gplib::input::CheckPush(gplib::input::KEY_MOUSE_LBTN))
-			{
-				gplib::se::DSound_Play("button");
-				effect::Create(0, 0, effect::EFFECTTYPE::FADEOUTBLACK);
-				exit(0);
-			}
+			gplib::se::DSound_Play("button");
+			effect::Create(0, 0, effect::EFFECTTYPE::FADEOUTBLACK);
+			exit(0);
 		}
 		//再生制御
 		void title_bgm()
@@ -182,6 +180,57 @@ namespace game
 				bgm_alpha_ = 255;
 			}
 		}
+		//選択し操作
+		void operations()
+		{
+			//マウス
+			POINT mousePos = gplib::input::GetMousePosition();
+			for (int i = 0; i < 2; i++)
+			{
+				if (mousePos.x > option[i].left && mousePos.x < option[i].right)
+				{
+					if (mousePos.y > option[i].top && mousePos.y < option[i].bottom)
+					{
+						if (i == 0)
+						{
+							decide_[0] = true;
+							decide_[1] = false;
+						}
+						else
+						{
+							decide_[0] = false;
+							decide_[1] = true;
+						}
+					}
+				}
+			}
+			//キーポート
+			if (gplib::input::CheckPush(gplib::input::KEY_LEFT))
+			{
+				decide_[0] = true;
+				decide_[1] = false;
+			}
+			else if (gplib::input::CheckPush(gplib::input::KEY_RIGHT))
+			{
+				decide_[0] = false;
+				decide_[1] = true;
+			}
+			//左クリックとスペースキーで決める
+			if (decide_[0])
+			{
+				alpha_[0] = 255;
+				alpha_[1] = 50;
+				if (gplib::input::CheckPush(gplib::input::KEY_MOUSE_LBTN) || gplib::input::CheckPush(gplib::input::KEY_SPACE))
+					start_option();
+			}
+			else if (decide_[1])
+			{
+				alpha_[0] = 50;
+				alpha_[1] = 255;
+				if (gplib::input::CheckPush(gplib::input::KEY_MOUSE_LBTN) || gplib::input::CheckPush(gplib::input::KEY_SPACE))
+					exit_option();
+			}
+		}
 
 		//隠し技 コナミコマンド 上上下下左右左右BA
 		//プレイヤーの一般攻撃は２連射->４連射に変化
@@ -224,29 +273,7 @@ namespace game
 
 		void update() override
 		{
-			//マウスを座標を取得
-			POINT mousePos = gplib::input::GetMousePosition();
-			for (int i = 0; i < 2; i++) 
-			{
-				if (mousePos.x > option[i].left && mousePos.x < option[i].right)
-				{
-					if (mousePos.y > option[i].top && mousePos.y < option[i].bottom)
-					{
-						if (i == 0)
-						{
-							alpha_[0] = 255;
-							alpha_[1] = 50;
-							start_option();
-						}
-						else
-						{
-							alpha_[0] = 50;
-							alpha_[1] = 255;
-							exit_option();
-						}
-					}
-				}
-			}
+			operations();
 			tips();
 			title_bgm();
 			bgm_volume();

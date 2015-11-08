@@ -9,6 +9,7 @@ namespace game
 	using namespace gplib;
 	using namespace ci_ext;
 
+	//エフェクトとして使います
 	bomb::bomb(const string& objectName) :
 		MovableObject(DrawObjf(
 		objectName, Vec3f::zero(), Vec3f::one(), objectName, Vec3f::zero(), Vec3f::zero(), Color(0xFFFFFFFF), 0))
@@ -116,9 +117,10 @@ namespace game
 		//SE
 		se::DSound_Play("kill");
 		//攻撃力初期化
-		atk_ = 0.f;
+//      atk_ = 0.f          //プレイヤーの最大ｈｐにより攻撃を計算する場合
+		atk_ = 30.f;
 		//プレイヤーの最大ｈｐにより攻撃倍数
-		atk_times = 0.03f;
+//		atk_times = 0.03f;
 	}
 	//アニメ
 	void bomb2::b2_anim()
@@ -154,9 +156,8 @@ namespace game
 		//プレイヤーのオブジェクトを取得
 		auto p = getPlayerPrt();
 		//プレイヤーのｈｐ設定により攻撃力変化する
-		atk_ = p->playerMaxHp() * atk_times;
-		//プレイヤーのｈｐ設定により攻撃力変化しない
-//		atk_ = atk_ * atk_using;
+//		atk_ = p->playerMaxHp() * atk_times;
+		//プレイヤーのｈｐ設定により攻撃力変化しないなら、攻撃力で計算する
 		if (atk_show)
 		{
 			p->p_receiving_atk(atk_);
@@ -253,9 +254,10 @@ namespace game
 		//SE
 		se::DSound_Play("landmine");
 		//攻撃力初期化
-		atk_ = 0.f;
+//      atk_ = 0.f          //プレイヤーの最大ｈｐにより攻撃を計算する場合
+		atk_ = 20.f;
 		//プレイヤーの最大ｈｐにより攻撃倍数
-		atk_times = 0.03f;
+//		atk_times = 0.03f;
 	}
 	//デストラクタ
 	bomb4::~bomb4()
@@ -289,9 +291,8 @@ namespace game
 		//プレイヤーのオブジェクトを取得
 		auto p = getPlayerPrt();
 		//プレイヤーのｈｐ設定により攻撃力変化する
-		atk_ = p->playerMaxHp() * atk_times;
-		//プレイヤーのｈｐ設定により攻撃力変化しない
-//		atk_ = atk_ * atk_using;
+//		atk_ = p->playerMaxHp() * atk_times;
+        //プレイヤーのｈｐ設定により攻撃力変化しないなら、攻撃力で計算する
 		if (atk_show)
 		{
 			p->p_receiving_atk(atk_);
@@ -338,9 +339,10 @@ namespace game
 		//SE
 		se::DSound_Play("beam");
 		//攻撃力初期化
-		atk_ = 0.f;
+//      atk_ = 0.f          //プレイヤーの最大ｈｐにより攻撃を計算する場合
+		atk_ = 20.f;
 		//プレイヤーの最大ｈｐにより攻撃倍数
-		atk_times = 0.04f;
+//		atk_times = 0.04f;
 	}
 	//アニメ
 	void bomb5::b5_anim()
@@ -372,9 +374,8 @@ namespace game
 		//プレイヤーのオブジェクトを取得
 		auto p = getPlayerPrt();
 		//プレイヤーのｈｐ設定により攻撃力変化する
-		atk_ = p->playerMaxHp() * atk_times;
-		//プレイヤーのｈｐ設定により攻撃力変化しない
-//		atk_ = atk_ * atk_using;
+//		atk_ = p->playerMaxHp() * atk_times;
+        //プレイヤーのｈｐ設定により攻撃力変化しないなら、攻撃力で計算する
 		if (atk_show)
 		{
 			p->p_receiving_atk(atk_);
@@ -497,16 +498,18 @@ namespace game
 		bomb(objectName)
 	{
 		//画像のサイズを取得
-		bomb8_w = graph::Draw_GetImageWidth("tk_explosion") / 7;
-		bomb8_h = graph::Draw_GetImageHeight("tk_explosion");
+		bomb8_w = graph::Draw_GetImageWidth("throw_explosion") / 7;
+		bomb8_h = graph::Draw_GetImageHeight("throw_explosion");
 		//初期化
 		setScale(Vec3f(bomb8_s, bomb8_s, 0.f));
 		setPos(Vec3f(bomb8_x, bomb8_y, 0.1f));
 		setSrcSize(Vec3f((float)bomb8_w, (float)bomb8_h, 0.f));
-		resname_ = "tk_explosion";
+		resname_ = "throw_explosion";
 		//アニメ
 		charabase::SetAnim(anim_, 8, 0.4f);
 		animMax_ = 7;
+		//se
+		se::DSound_Play("throw_explosion");
 	}
 	//デストラクタ
 	bomb8::~bomb8()
@@ -522,10 +525,6 @@ namespace game
 		{
 			setSrc(Vec3f((float)t[anim_.no], 0.f, 0.f));
 		}
-		else if (anim_.no == 4)
-		{
-//			insertAsChild(new e_shot6_atk());
-		}
 		else if (anim_.no >= animMax_)
 		{
 			kill();
@@ -540,5 +539,115 @@ namespace game
 	{
 		MovableObject::update();
 		b8_anim();
+	}
+
+	//レベルアップアニメ
+	bomb9::bomb9(const std::string& objectName, const float& bomb9_x, const float& bomb9_y, const float& bomb9_s) :
+		bomb(objectName)
+	{
+		//画像のサイズを取得
+		bomb9_w = graph::Draw_GetImageWidth("levelup");
+		bomb9_h = graph::Draw_GetImageHeight("levelup");
+		//初期化
+		setScale(Vec3f(bomb9_s, bomb9_s, 0.f));
+		setPos(Vec3f(bomb9_x, bomb9_y, 0.1f));
+		setSrcSize(Vec3f((float)bomb9_w, (float)bomb9_h, 0.f));
+		resname_ = "levelup";
+		//移動速度
+		velocity_.y(-1.2f);
+		//値渡し
+		player_posY = bomb9_y;
+		//アニメ
+		alpha_ = 255;
+		setColor(alpha_, 255, 255, 255);
+		//se
+		se::DSound_Play("level_up");
+	}
+	//デストラクタ
+	bomb9::~bomb9()
+	{
+		
+	}
+	//隠す
+	void bomb9::b9_move()
+	{
+		if (pos().y() <= player_posY - 60.f) 
+		{
+			alpha_ -= 5;
+			velocity_.y(0.f);
+			if (alpha_ < 0)
+			{
+				alpha_ = 0;
+				kill();
+			}
+		}
+	}
+	void bomb9::render()
+	{
+		MovableObject::render();
+	}
+
+	void bomb9::update()
+	{
+		MovableObject::update();
+		setColor(alpha_, 255, 255, 255);
+		b9_move();
+	}
+
+	//ｈｐ回復アニメ
+	bomb10::bomb10(const std::string& objectName, const float& bomb10_x, const float& bomb10_y, const float& bomb10_s, const int& count) :
+		bomb(objectName)
+	{
+		//画像のサイズを取得
+		bomb10_w = graph::Draw_GetImageWidth("heal");
+		bomb10_h = graph::Draw_GetImageHeight("heal");
+		//初期化
+		setScale(Vec3f(bomb10_s, bomb10_s, 0.f));
+		setPos(Vec3f(bomb10_x, bomb10_y, 0.1f));
+		setSrcSize(Vec3f((float)bomb10_w, (float)bomb10_h, 0.f));
+		resname_ = "heal";
+		//表現時間制御
+		alpha_ = 0;
+		sleep(math::GetRandom(5,20));
+		//透明度
+		setColor(alpha_, 255, 255, 255);
+		//重複させないように
+		begin_ = true;
+	}
+	//デストラクタ
+	bomb10::~bomb10()
+	{
+
+	}
+	//動き
+	void bomb10::b10_move()
+	{
+		if (begin_)
+		{
+			if (alpha_ == 0)
+			{
+				alpha_ = 255;
+				velocity_.y(-1.f);
+			}
+			begin_ = false;
+		}
+		alpha_ -= 5;
+		if (alpha_ < 0)
+		{
+			alpha_ = 0;
+			velocity_.y(0.f);
+			kill();
+		}
+	}
+	void bomb10::render()
+	{
+		MovableObject::render();
+	}
+
+	void bomb10::update()
+	{
+		MovableObject::update();
+		setColor(alpha_, 255, 255, 255);
+		b10_move();
 	}
 }

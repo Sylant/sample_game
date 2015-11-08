@@ -55,8 +55,10 @@ namespace game
 	private:
 		int shot1_w;
 		int shot1_h;
-		bool s1_show;
+		float atk_;
+		float atk_times;
 		float s1_speed;
+		bool atk_show;
 	public:
 		e_shot1(const std::string& objectName,const float& posX,const float& posY ,const float& speed);
 		~e_shot1();
@@ -82,9 +84,10 @@ namespace game
 		int shot2_w;
 		int shot2_h;
 		int atk_count;
+		float exp_;
 		float posX_;
 		float s2_speed;
-		float s2_speed_;
+		float s2_speed2;
 		bool down_;
 		bool atk_show;
 		bool bomb2_show;
@@ -133,7 +136,7 @@ namespace game
 		int shot3_h;
 		float posX_;
 		float posY_;
-		
+		float exp_;
 	public:
 		e_shot3(const std::string& obejctName);
 		~e_shot3();
@@ -158,6 +161,7 @@ namespace game
 		int frame_;
 		int state_;
 		int hp_;
+		float exp_;
 		float posX_;
 		bool appear_show;
 		bool atk_show;
@@ -195,15 +199,19 @@ namespace game
 	private:
 		int hp_;
 		int frame_;
+		int max_frame;
 		int state_;
+		int type_;
 		int shot5_w;
 		int shot5_h;
+		float exp_;
 		float posX_;
 		float moving_speed;
 		bool atk_show;
 		enum s5_mode { NORMAL, ATTACK };
+		enum s5_type { type1, type2, type3 };
 	public:
-		e_shot5(const std::string& obejctName);
+		e_shot5(const std::string& obejctName , const int& num);
 		~e_shot5();
 
 		void s5_move();
@@ -238,69 +246,92 @@ namespace game
 		void offenseHit(std::weak_ptr<ci_ext::Object>&) override;
 	};
 
-	class e_shot6 : public shot
+	class e_shot5_throw : public shot
 	{
 	private:
 		int hp_;
-		int frame_;
-		int state_;
-		int shot6_w;
-		int shot6_h;
-		float posX_;
-		float moving_speed;
-		bool atk_show;
-		enum s6_mode { NORMAL, ATTACK };
+		int fire_;
+		int s5_throw_w;
+		int s5_throw_h;
+		float exp_;
 	public:
-		e_shot6(const std::string& obejctName);
-		~e_shot6();
+		e_shot5_throw(const std::string& obejctName, const float& posX, const float& posY, const float& scale);
+		~e_shot5_throw();
 
-		void s6_move();
-		void s6_anim();
-		void s6_setdefense();
+		void s5t_move();
+		void s5t_setdefense();
 		void render() override;
 		void update() override;
 		//Ç‚ÇÁÇÍîªíËÇ…çUåÇÇêHÇÁÇ¡ÇΩ
 		void defenseHit(std::weak_ptr<ci_ext::Object>&) override;
 	};
 
-	class e_shot6_thorw : public shot
+	class e_shot5_atk2 : public shot
 	{
 	private:
-		int hp_;
-		int s6_thorw_w;
-		int s6_thorw_h;
-	public:
-		e_shot6_thorw(const std::string& obejctName, const float& posX, const float& posY);
-		~e_shot6_thorw();
-
-		void s6t_move();
-		void s6t_setdefense();
-		void render() override;
-		void update() override;
-		//Ç‚ÇÁÇÍîªíËÇ…çUåÇÇêHÇÁÇ¡ÇΩ
-		void defenseHit(std::weak_ptr<ci_ext::Object>&) override;
-	};
-
-	class e_shot6_atk : public shot
-	{
-	private:
-		int s6_atk_w;
-		int s6_atk_h;
+		int angle_;
+		int distance;
+		int s5_atk2_w;
+		int s5_atk2_h;
 		float atk_;
 		float atk_times;
-		float targetX_;
-		float targetY_;
-		float player_posX;
-		float player_posY;
+		float targetX;
+		float targetY;
 		float atk_speed;
 		bool atk_show;
+		bool is_distance;
 	public:
-		e_shot6_atk(const std::string& objectName, const float& p_posX, const float& p_posY, const float& angle);
-		~e_shot6_atk();
+		e_shot5_atk2(const std::string& objectName, const float& p_posX, const float& p_posY, const float& angle);
+		~e_shot5_atk2();
 
-		void s6a_move();
-		void s6a_out();
-		void s6a_setoffense();
+		void s5a2_move();
+		void s5a2_out();
+		void s5a2_setoffense();
+		void render() override;
+		void update() override;
+		//çUåÇîªíËÇ…ÇÊÇËçUåÇÇó^Ç¶ÇΩ
+		void offenseHit(std::weak_ptr<ci_ext::Object>&) override;
+	};
+
+	class e_shot5_throw2 : public shot
+	{
+	private:
+		int hp_;
+		int fire_;
+		int fire_count;
+		int del_count;
+		int s5_throw2_w;
+		int s5_throw2_h;
+		float exp_;
+		bool atk_show;
+	public:
+		e_shot5_throw2(const std::string& obejctName, const float& posX, const float& posY, const float& scale);
+		~e_shot5_throw2();
+
+		void s5t2_move();
+		void s5t2_setdefense();
+		void render() override;
+		void update() override;
+		//Ç‚ÇÁÇÍîªíËÇ…çUåÇÇêHÇÁÇ¡ÇΩ
+		void defenseHit(std::weak_ptr<ci_ext::Object>&) override;
+	};
+
+	class e_shot5_atk3 : public shot
+	{
+	private:
+		int s5_atk3_w;
+		int s5_atk3_h;
+		float atk_;
+		float atk_times;
+		float atk_speed;
+		bool atk_show;
+		bool is_distance;
+	public:
+		e_shot5_atk3(const std::string& objectName, const float& p_posX, const float& p_posY, const float& angle);
+		~e_shot5_atk3();
+
+		void s5a3_out();
+		void s5a3_setoffense();
 		void render() override;
 		void update() override;
 		//çUåÇîªíËÇ…ÇÊÇËçUåÇÇó^Ç¶ÇΩ

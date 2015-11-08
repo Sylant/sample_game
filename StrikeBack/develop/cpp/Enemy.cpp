@@ -46,24 +46,25 @@ namespace game
 		else 
 			dir_ = e_Dir::RIGHT;
 		
+		heal_ = 0.f;                       //ボスｈｐ回復数初期化
 		frame_ = 0;                        //フレーム数 攻撃状態と一般状態の変化
 		s1_probability = 400;              //ステージ内自動攻撃の最大確率
 		init_max_probability = 200;        //初期攻撃モードに入る最大確率
-		max_probability =   0;             //攻撃モードに入る最大確率
-		max_probability_times = 0.4f;      //最低確率を確報ための最大確率の倍率数
+		max_probability = 0;               //後期攻撃モードに入る最大確率初期化
+		max_probability_times = 0.4f;      //最低確率を確報ため、最大確率の倍率数
 		init_moving_speed = 1.f;           //初期移動速度
 		moving_speed = 0.f;                //移動速度初期化
+		hide_count = 0;                    //隠すカウント
 		get_s2_count = 0;                  //ショット２カウント　現存数
 		is_s2_count = 3;                   //ショット２カウント　最大数+3
-		shot_count = 3;                    //ショットは一回で何個か呼ばれるか制御する
-		Max_hp = 300.f;                    //最大ｈｐ
-		hp_ = 300.f;                       //現時点のｈｐ
+		Max_hp = 1000.f;                   //最大ｈｐ
+		hp_ = Max_hp;                      //現時点ｈｐ
 		previous_hp = 0.f;                 //前フレームのｈｐ初期化
 		result_ = true;                    //ゲームクリアする時に制御
 		atk_show = false;                  //連続攻撃させない
 		died_show = false;                 //クリア時に一部を制御する
-		hide_atk = false;                  //初期隠す、当たり判定はそのまま存在する
-		alpha_ = 0;                        //透明度０に
+		heal_check = false;                //現れた時の回復を一回のみに制御する
+		alpha_ = 255;                      //透明度
 		setColor(alpha_, 255, 255, 255);   //描画色を初期化
 	}
 	Enemy::~Enemy()
@@ -74,7 +75,7 @@ namespace game
 	void Enemy::e_move()
 	{
 		//hp変化により移動速度の変化
-		moving_speed = (Max_hp - hp_) * 0.001f + init_moving_speed;
+		moving_speed = (Max_hp - hp_) * 0.002f + init_moving_speed;
 
 		//移動
 		if (dir_ == e_Dir::RIGHT)
@@ -97,22 +98,25 @@ namespace game
 			//hpの変化により確率変化
 			if (hp_ == Max_hp)
 			{ 
+				//初期時値を渡し
 				max_probability = init_max_probability;
-				//現時点ｈｐの値を渡す
 				previous_hp = hp_;
 			}
 			else if (hp_ != Max_hp)
 			{
+				//ｈｐ変化しない->何もしない
 				if (hp_ == previous_hp) {}
+				//ｈｐは前より少なくなったら、攻撃率上昇
 				else if (hp_ < previous_hp)
 				{
 					--max_probability;
 				}
+				//ｈｐは前より多くなったら、攻撃率下降
 				else if (hp_ > previous_hp)
 				{
 					++max_probability;
 				}
-				//確率数制御する
+				//最大と最小確率数を制御する
 				if (max_probability <= init_max_probability * max_probability_times)
 					max_probability = (int)(init_max_probability * max_probability_times);
 				else if (max_probability > init_max_probability)
@@ -148,39 +152,86 @@ namespace game
 			
 			if (atk_show)
 			{
-				//スキル2が3 + 3以上存在すれば、呼び出しことできないに設定
-				if (get_s2_count <= is_s2_count)
+				//初期
+				//ｈｐは９５％～
+				if (hp_ >= Max_hp * 0.95f)
 				{
-					for (int i = 0;i < shot_count;++i)
+					e_scene4();
+					e_scene3();
+				}
+				//ｈｐは８５％～９５％
+				else if (hp_ >= Max_hp * 0.85f && hp_< Max_hp * 0.95)
+				{
+					for (int i = 0;i < 2;++i)
+						e_scene4();
+					for (int i = 0;i < 2;++i)
+						e_scene3();
+				}
+				//ｈｐは７０％～８５％
+				else if (hp_ >= Max_hp * 0.7f && hp_ < Max_hp * 0.85f)
+				{
+					for (int i = 0;i < 3;++i)
+						e_scene3();
+					e_scene2();
+					e_scene5();
+				}
+				//ｈｐは６０％～７０％
+				else if (hp_ >= Max_hp * 0.6f && hp_ < Max_hp * 0.7f)
+				{
+					for (int i = 0;i < 3;++i)
+						e_scene2();
+					for (int i = 0;i < 2;++i)
+						e_scene5();
+					e_scene1(2);
+					e_scene6();
+				}
+				//ｈｐは４５％～６０％
+				else if (hp_ >= Max_hp * 0.45f && hp_ < Max_hp * 0.6f)
+				{
+					for (int i = 0;i < 3;++i)
+						e_scene3();
+					e_scene1(3);
+					e_scene2();
+					e_scene6();
+				}
+				//ｈｐは３５％～４５％
+				else if (hp_ >= Max_hp * 0.35f && hp_ < Max_hp * 0.45f)
+				{
+					for (int i = 0;i < 3;++i)
+						e_scene2();
+					for (int i = 0;i < 2;++i)
+						e_scene6();
+					for (int i = 0;i < 2;++i)
+						e_scene4();
+					e_scene1(3);
+				}
+				//ｈｐは２５％～３５％
+				else if (hp_ >= Max_hp * 0.25f && hp_ < Max_hp * 0.35f)
+				{
+					for (int i = 0;i < 4;++i)
+						e_scene3();
+					e_scene1(5);
+				}
+				//ｈｐは１５％～２５％
+				else if (hp_ >= Max_hp * 0.25f && hp_ < Max_hp * 0.35f)
+				{
+					for (int i = 0;i < 2;++i)
 					{
-						insertAsChild(new e_shot2("mini", pos().x(), pos().y(), i));
-						++get_s2_count;
+						e_scene2();
+						e_scene5();
+						e_scene6();
 					}
+					e_scene4();
 				}
-				//hpの変化により三つのパタンを分けて、攻撃強度変化する
-				if (hp_ >= Max_hp * 0.7f)
+				//ｈｐは～１５％
+				else if (hp_ <= Max_hp * 0.15f)
 				{
-					insertAsChild(new e_shot3("landmine"));
-					insertAsChild(new e_shot4("ufo"));
-					insertAsChild(new e_shot5("heli"));
-				}
-				else if (hp_ >= Max_hp * 0.3f && hp_ < Max_hp * 0.7f)
-				{
-					for (int i = 0;i < shot_count - 2;++i)
-						insertAsChild(new e_shot3("landmine"));
-					for (int i = 0;i < shot_count;++i)
-						insertAsChild(new e_shot4("ufo"));
-					for (int i = 0;i < shot_count - 2;++i)
-						insertAsChild(new e_shot5("heli"));
-				}
-				else if (hp_ < Max_hp * 0.3f)
-				{
-					for (int i = 0;i < shot_count - 1;++i)
-						insertAsChild(new e_shot3("landmine"));
-					for (int i = 0;i < shot_count + 1;++i)
-						insertAsChild(new e_shot4("ufo"));
-					for (int i = 0;i < shot_count - 1;++i)
-						insertAsChild(new e_shot5("heli"));
+					for (int i = 0;i < 4;++i)
+						e_scene3();
+					e_scene1(4);
+					e_scene4();
+					e_scene5();
+					e_scene6();
 				}
 				atk_show = false;
 			}
@@ -208,6 +259,45 @@ namespace game
 		}
 		    break;
 		}
+	}
+	//ボス攻撃方法
+	//ミニエネミー呼ぶ
+	void Enemy::e_scene1(const int& s2_count)
+	{
+		//スキル2が設定数以上存在すると、呼び出しことできないに設定
+		if (get_s2_count <= s2_count)
+		{
+			for (int i = 0;i < s2_count;++i)
+			{
+				insertAsChild(new e_shot2("mini", pos().x(), pos().y(), i));
+				++get_s2_count;
+			}
+		}
+	}
+	//地雷呼ぶ
+	void Enemy::e_scene2()
+	{
+		insertAsChild(new e_shot3("landmine"));
+	}
+	//ＵＦＯ呼ぶ
+	void Enemy::e_scene3()
+	{
+		insertAsChild(new e_shot4("ufo"));
+	}
+	//ヘリコプタータイプ１呼ぶ
+	void Enemy::e_scene4()
+	{
+		insertAsChild(new e_shot5("heli", 1));
+	}
+	//ヘリコプタータイプ２呼ぶ
+	void Enemy::e_scene5()
+	{
+		insertAsChild(new e_shot5("heli", 2));
+	}
+	//ヘリコプタータイプ３呼ぶ
+	void Enemy::e_scene6()
+	{
+		insertAsChild(new e_shot5("heli", 3));
 	}
 
 	//ステージへ関数を呼ぶ
@@ -311,8 +401,7 @@ namespace game
 	{
 		if (hp_ > 0.f)
 		{
-			//やられたら、ｈｐを減らす
-			hp_ -= Max_hp * 0.005f;
+			--hp_;
 			if (hp_ <= 0.f)
 			{
 				for (int i = 0;i < 10;++i)
@@ -325,15 +414,70 @@ namespace game
 			}
 		}
 	}
-	//初期は身を隠す　当たり判定存在する
+	//ｈｐによりボスの身を隠すか表すか
+	void Enemy::e_hide_check()
+	{
+		if (hp_ <= Max_hp * 0.9f && hp_ > Max_hp * 0.8f)
+			e_not_hide();
+		else if (hp_ <= Max_hp * 0.75f && hp_ > Max_hp * 0.65f)
+			e_hide_it();
+		else if (hp_ <= Max_hp * 0.6f && hp_ > Max_hp * 0.5f)
+			e_not_hide();
+		else if (hp_ <= Max_hp * 0.45f && hp_ > Max_hp * 0.35f)
+			e_hide_it();
+		else if (hp_ <= Max_hp * 0.3f && hp_ > Max_hp * 0.2f)
+			e_not_hide();
+		else if (hp_ <= Max_hp * 0.15f)
+			e_hide_it();
+	}
+
+	//身を表す
 	void Enemy::e_hide_it()
 	{
-		if (Max_hp - hp_ >= Max_hp * 0.15f)
+		alpha_ += 30;
+		if (alpha_ > 255)
 		{
-			alpha_ += 30;
-			if (alpha_ >= 255) alpha_ = 255;
+			alpha_ = 255;
+			hide_count = 0;
+			if (heal_check)
+			{
+				heal_ = math::GetRandom(Max_hp * 0.025f, Max_hp * 0.05f);
+				//現れた時にｈｐ回復する
+				hp_ += heal_;
+				if (hp_ > Max_hp) hp_ = Max_hp;
+				for (int i = 0;i <= (int)heal_;++i)
+				{
+					insertToParent(new bomb10("heal", math::GetRandom(pos().x() - (float)boss_w / 2.f, pos().x() + (float)boss_w / 2.f),
+						math::GetRandom(pos().y() - (float)boss_h / 2.f, pos().y() + (float)boss_h / 2.f), 1.5f, i));
+				}
+				heal_check = false;
+			}
 		}
+		setColor(alpha_, 255, 255, 255);
+	}
 
+	//身を隠す　当たり判定存在する
+	void Enemy::e_not_hide()
+	{
+		alpha_ -= 30;
+		if (alpha_ < 0)
+		{
+			alpha_ = 0;
+		}
+		if (alpha_ == 0)
+		{
+			++hide_count;
+			//６０ＦＰＳ１秒、隠す１０秒後、ｈｐ回復開始
+			if (hide_count / 60 > 10)
+			{
+				//毎３００フレーム１点回復
+				if (hide_count % 300 == 0)
+				{
+					++hp_;
+				}
+			}
+			heal_check = true;
+		}
 		setColor(alpha_, 255, 255, 255);
 	}
 
@@ -352,7 +496,7 @@ namespace game
 		e_move();
 		e_out();
 		e_state();
-		e_hide_it();
+		e_hide_check();
 		e_speceatk();
 		e_setdefense();
 		s2_count(num_);

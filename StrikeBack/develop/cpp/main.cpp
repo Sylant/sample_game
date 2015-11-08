@@ -16,7 +16,7 @@
 
 namespace gplib{
   namespace system{
-    const char USERNAME[256] = "Strike Back v1.05";
+    const char USERNAME[256] = "Strike Back v1.07";             //2015/11/08 更新v1.07
     const int	WINW = 1040;									//16:10
     const int	WINH = 650;										//
     bool	WindowMode = true;							    	//フルスクリーン対応

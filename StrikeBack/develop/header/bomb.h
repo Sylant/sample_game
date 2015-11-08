@@ -9,6 +9,7 @@
 
 namespace game
 {
+	//エフェクトとして使います
 	class Player;
 	class bomb : public MovableObject
 	{
@@ -146,6 +147,38 @@ namespace game
 		~bomb8();
 
 		void b8_anim();
+		void render() override;
+		void update() override;
+	};
+
+	class bomb9 : public bomb
+	{
+	private:
+		int bomb9_w;
+		int bomb9_h;
+		int alpha_;
+		float player_posY;
+	public:
+		bomb9(const std::string& objectName, const float& bomb9_x, const float& bomb9_y, const float& bomb9_s);
+		~bomb9();
+
+		void b9_move();
+		void render() override;
+		void update() override;
+	};
+
+	class bomb10 : public bomb
+	{
+	private:
+		int bomb10_w;
+		int bomb10_h;
+		int alpha_;
+		bool begin_;
+	public:
+		bomb10(const std::string& objectName, const float& bomb10_x, const float& bomb10_y, const float& bomb10_s,const int& count);
+		~bomb10();
+
+		void b10_move();
 		void render() override;
 		void update() override;
 	};

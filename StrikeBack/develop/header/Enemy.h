@@ -21,8 +21,7 @@ namespace game
 		int state_;
 		int frame_;
 		int alpha_;
-		int s2_count_;
-		int shot_count;
+		int hide_count;
 		int get_s2_count;
 		int is_s2_count;
 		int boss_w;
@@ -33,11 +32,12 @@ namespace game
 		float max_probability_times;
 		float Max_hp;
 		float hp_;
+		float heal_;
 		float previous_hp;
 		float moving_speed;
 		float init_moving_speed;
 		bool atk_show;
-		bool hide_atk;
+		bool heal_check;
 		bool died_show;
 		bool result_;
 
@@ -47,6 +47,12 @@ namespace game
 		~Enemy();
 
 		bool diedshow();
+		void e_scene1(const int& s2_count);
+		void e_scene2();
+		void e_scene3();
+		void e_scene4();
+		void e_scene5();
+		void e_scene6();
 		void s2_count(const int& num);
 		void e_speceatk();
 		void e_anim();
@@ -54,7 +60,9 @@ namespace game
 		void e_state();
 		void e_out();
 		void e_result();
+		void e_hide_check();
 		void e_hide_it();
+		void e_not_hide();
 		void e_backrun();
 		void e_setdefense();
 		void render() override;
